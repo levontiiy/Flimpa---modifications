@@ -1,0 +1,10 @@
+[submodule "FLIMfitLibrary/FLIMreader"]
+	path = FLIMfitLibrary/FLIMreader
+	url = https://github.com/flimfit/FlimReader.git
+   branch=flim-realignment
+[submodule "FLIMfitFrontEnd/matlab-ui-common"]
+	path = FLIMfitFrontEnd/matlab-ui-common
+	url = https://github.com/flimfit/matlab-ui-common.git
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg
