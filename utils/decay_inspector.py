@@ -8,6 +8,14 @@ import numpy as np
 
 from utils.shared_data import SharedData
 
+_BIN_EDGE = {
+    "None": 1,
+    "3x3": 3,
+    "7x7": 7,
+    "9x9": 9,
+    "12x12": 12,
+}
+
 
 @dataclass
 class PixelDecay:
@@ -25,6 +33,14 @@ class PixelDecay:
     t0_ns: float | None = None
     baseline_fraction_pct: float | None = None
     fit_allowed: bool = False
+    block_size: int = 1
+
+
+def pixel_block_edge(shared: SharedData | None = None) -> int:
+    """Spatial block edge from Pixel block size (same mapping as LifetimeData.get_bins)."""
+    if shared is None:
+        shared = SharedData()
+    return int(_BIN_EDGE.get(shared.config.get("bins", "None"), 1))
 
 
 def baseline_t0_ns(t_ns: np.ndarray, fraction_percent: float) -> float | None:
@@ -73,6 +89,19 @@ def _apply_baseline_correction(counts: np.ndarray, fraction_percent: float) -> n
     return np.clip(corrected, 0, None)
 
 
+def _block_sum_counts(cube: np.ndarray, yi: int, xi: int, block: int) -> np.ndarray:
+    """Sum TCSPC counts over an N×N neighbourhood centred on (yi, xi), clipped to bounds."""
+    if block <= 1:
+        return np.asarray(cube[:, yi, xi], dtype=np.float64)
+    ny, nx = cube.shape[1], cube.shape[2]
+    half = block // 2
+    y0 = max(0, yi - half)
+    y1 = min(ny, yi + half + 1)
+    x0 = max(0, xi - half)
+    x1 = min(nx, xi + half + 1)
+    return np.asarray(cube[:, y0:y1, x0:x1], dtype=np.float64).sum(axis=(1, 2))
+
+
 def _tau_at_pixel(filename: str, yi: int, xi: int, shared: SharedData) -> float | None:
     """Mean lifetime (ns) at pixel from analysis results, if available."""
     if filename not in shared.results_dict:
@@ -109,6 +138,9 @@ def get_pixel_decay(
 
     Uses masked_data when present; optional baseline correction follows the
     Baseline correction parameter unless apply_baseline overrides it.
+
+    Spatial averaging follows Pixel block size (same N×N as phasor analysis).
+    Map τ is taken from the centre pixel.
     """
     shared = SharedData()
     if not filename or filename not in shared.raw_data_dict:
@@ -125,7 +157,8 @@ def get_pixel_decay(
 
     use_masked = entry.get("masked_data")
     cube = np.asarray(use_masked if use_masked is not None else raw)
-    counts = np.asarray(cube[:, yi, xi], dtype=np.float64)
+    block = pixel_block_edge(shared)
+    counts = _block_sum_counts(cube, yi, xi, block)
 
     masked_out = bool(np.all(counts == 0))
 
@@ -158,4 +191,5 @@ def get_pixel_decay(
         t0_ns=t0_ns,
         baseline_fraction_pct=fraction_pct if apply_baseline else None,
         fit_allowed=fit_allowed,
+        block_size=block,
     )

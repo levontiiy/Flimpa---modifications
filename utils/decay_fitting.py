@@ -428,10 +428,13 @@ def predict_decay_at_tau(
   shared: SharedData | None = None,
   t0_ns: float | None = None,
   peak_align: bool = False,
+  use_irf: bool | None = None,
 ) -> np.ndarray | None:
   """
   Model decay for a fixed τ (e.g. lifetime-map value), scaled to the measured total photons.
   Uses the same IRF reconvolution as the fitter when a reference is loaded.
+
+  use_irf: None = auto (reference if available); True/False = force on/off (test UI).
   """
   t_ns = np.asarray(t_ns, dtype=np.float64)
   counts = np.asarray(counts, dtype=np.float64)
@@ -441,6 +444,8 @@ def predict_decay_at_tau(
     return None
   shared = shared or SharedData()
   t_s, used_irf, irf_on_grid = _prepare_forward_context(t_ns, shared)
+  if use_irf is False:
+    used_irf, irf_on_grid = False, None
   if t0_ns is not None:
     fit_mask = t_ns >= float(t0_ns) - 1e-9
     a_fixed = float(counts[fit_mask].max()) if np.any(fit_mask) else float(counts.max())
@@ -465,6 +470,7 @@ def fit_single_exponential(
   tau_hint_ns: float | None = None,
   t0_ns: float | None = None,
   peak_align: bool = False,
+  use_irf: bool | None = None,
   shared: SharedData | None = None,
 ) -> DecayFitResult | None:
   """
@@ -473,6 +479,8 @@ def fit_single_exponential(
   Requires t₀ from baseline correction (first channel after the baseline window).
   Amplitude A is fixed to max(measured counts) at/after t₀ before τ is optimised.
   The IRF⊗exp model stays on the instrument time grid; baseline correction is the offset fix.
+
+  use_irf: None = auto; True/False = force (test UI).
   """
   t_ns = np.asarray(t_ns, dtype=np.float64)
   counts = np.asarray(counts, dtype=np.float64)
@@ -519,6 +527,8 @@ def fit_single_exponential(
     offset: float = 0.0,
   ) -> tuple[np.ndarray, float, float] | tuple[None, float, float]:
     t_s, used_irf, irf_on_grid = _prepare_forward_context(t_ns_grid, shared)
+    if use_irf is False:
+      used_irf, irf_on_grid = False, None
     return _forward_model(
       t_s, tau_ns, y_ref, offset,
       used_irf=used_irf, irf_on_grid=irf_on_grid,
@@ -543,6 +553,8 @@ def fit_single_exponential(
   best_res = None
   best_obj = np.inf
   used_irf = _prepare_forward_context(t_fit_ns, shared)[1]
+  if use_irf is False:
+    used_irf = False
   for tau_start in dict.fromkeys(round(s, 4) for s in starts):
     x0 = np.array([tau_start] + ([np.log(0.5)] if fit_offset else []), dtype=np.float64)
     bounds = [(tau_min, tau_max)]

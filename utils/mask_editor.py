@@ -273,6 +273,12 @@ class ManualMaskEditor:
         self._tool = None
         if self._ax is not None and self._ax.figure.canvas:
             self._ax.figure.canvas.draw_idle()
+        self._sync_baseline_check_ui()
+
+    def _sync_baseline_check_ui(self):
+        tb = getattr(self.main_window, "toolbar_components", None)
+        if tb is not None:
+            tb.sync_baseline_check_ui()
 
     def set_antimask_mode(self, enabled: bool):
         """Antimasking: drawing tools remove mask (delete regions / holes)."""
@@ -537,11 +543,13 @@ class ManualMaskEditor:
             self.main_window.decay_window.show_and_raise()
             self._setup_inspect()
             self._ax.figure.canvas.draw_idle()
+            self._sync_baseline_check_ui()
             return
 
         if tool == "brush":
             self._setup_brush()
             self._ax.figure.canvas.draw_idle()
+            self._sync_baseline_check_ui()
             return
 
         self._disconnect_canvas_tools()
@@ -603,6 +611,7 @@ class ManualMaskEditor:
         if self._selector is not None:
             self._selector.set_active(True)
         self._ax.figure.canvas.draw_idle()
+        self._sync_baseline_check_ui()
 
     def save_to_path(self, path: str | Path) -> str | None:
         filename = self._selected_filename()

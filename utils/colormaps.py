@@ -2,8 +2,8 @@
 
 Used by Lifetime maps, Gallery (tau), and exports via resolve_lifetime_cmap().
 
-UI: Settings panel on the Lifetime maps / Gallery (tau) tabs
-    (Colormap dropdown + Load custom...).
+UI: top analysis toolbar Colormap dropdown + Load custom...
+    (see ToolBarComponents.setup_analysis_toolbar in utils/toolbar.py).
 
 Presets: Rainbow, Binary, Viridis, etc. (see LIFETIME_CMAP_PRESETS).
 Custom: set lifetime_cmap to "Custom" and lifetime_cmap_file to:

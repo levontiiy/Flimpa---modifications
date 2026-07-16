@@ -1,15 +1,13 @@
 from PySide6.QtWidgets import (QLabel, QHBoxLayout, QLineEdit, QGroupBox, QGridLayout, QSizePolicy,
-                               QVBoxLayout, QWidget, QComboBox, QPushButton, QFileDialog, QScrollArea)
+                               QVBoxLayout, QWidget, QComboBox, QScrollArea)
 from PySide6.QtCore import Qt
 
 from utils.shared_data import SharedData
-from utils.colormaps import LIFETIME_CMAP_PRESETS, clear_custom_colormap_cache
 
 class TabSettingsWidgets():
     """Visualisation settings shown inside each image tab after analysis.
 
-    Colormap controls (lifetime_cmap / lifetime_cmap_file) appear on Lifetime maps
-    and Gallery (tau). Changing them refreshes the current lifetime display.
+    Colormap controls live on the top menu bar (see ToolBarComponents).
     """
     def __init__(self, main_window):
         self.shared_info = SharedData()
@@ -81,85 +79,8 @@ class TabSettingsWidgets():
 
         return h_layout_parameters
 
-    def colormap_settings(self, plot_type):
-        """Preset dropdown + custom file picker; writes shared_info.config lifetime_cmap keys."""
-        plot_id = "tau" if plot_type == "tau_map" else plot_type
-
-        preset_label = QLabel("Colormap")
-        preset_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        preset_combo = QComboBox()
-        preset_combo.addItems(LIFETIME_CMAP_PRESETS + ["Custom"])
-        preset_combo.setFixedWidth(120)
-        preset_combo.setEditable(False)
-        preset_combo.setCurrentText(self.shared_info.config.get("lifetime_cmap", "Rainbow"))
-        preset_combo.setStyleSheet("""QComboBox {
-                                       background-color: rgb(63, 63, 63);
-                                       color: white; }""")
-
-        browse_button = QPushButton("Load custom...")
-        browse_button.setStyleSheet("QPushButton { color: white; }")
-
-        file_label = QLabel("Custom file")
-        file_path = QLineEdit()
-        file_path.setReadOnly(True)
-        cmap_file = self.shared_info.config.get("lifetime_cmap_file", "None")
-        file_path.setText("" if cmap_file in (None, "None") else cmap_file)
-        file_path.setStyleSheet("""QLineEdit {
-                                        background-color: rgb(63, 63, 63);
-                                        color: white; }""")
-
-        self.widget_dict[f"{plot_id}_lifetime_cmap"] = preset_combo
-        self.widget_dict[f"{plot_id}_lifetime_cmap_file"] = file_path
-
-        def on_preset_changed():
-            name = preset_combo.currentText()
-            self.shared_info.config["lifetime_cmap"] = name
-            self.sync_widgets("lifetime_cmap", name)
-            self._refresh_lifetime_visuals(plot_type, "lifetime_cmap")
-
-        def on_browse():
-            path, _ = QFileDialog.getOpenFileName(
-                self.main_window,
-                "Select custom colormap",
-                "",
-                "Colormap files (*.csv *.txt *.png *.jpg *.jpeg *.tif *.tiff);;All files (*)",
-            )
-            if not path:
-                return
-            clear_custom_colormap_cache()
-            self.shared_info.config["lifetime_cmap_file"] = path
-            self.shared_info.config["lifetime_cmap"] = "Custom"
-            preset_combo.blockSignals(True)
-            preset_combo.setCurrentText("Custom")
-            preset_combo.blockSignals(False)
-            file_path.setText(path)
-            self.sync_widgets("lifetime_cmap", "Custom")
-            for key, widget in self.widget_dict.items():
-                if key.endswith("lifetime_cmap_file") and isinstance(widget, QLineEdit):
-                    widget.setText(path)
-            self._refresh_lifetime_visuals(plot_type, "lifetime_cmap_file")
-
-        preset_combo.currentIndexChanged.connect(on_preset_changed)
-        browse_button.clicked.connect(on_browse)
-
-        preset_row = QHBoxLayout()
-        preset_row.addWidget(preset_label)
-        preset_row.addWidget(preset_combo)
-        preset_row.addWidget(browse_button)
-
-        file_row = QHBoxLayout()
-        file_row.addWidget(file_label)
-        file_row.addWidget(file_path, 1)
-
-        wrapper = QVBoxLayout()
-        wrapper.addLayout(preset_row)
-        wrapper.addLayout(file_row)
-        return wrapper
-
     def _refresh_lifetime_visuals(self, plot_type, param_id):
-        if param_id not in ("lifetime_cmap", "lifetime_cmap_file", "lifetime_vmin", "lifetime_vmax",
-                            "lifetime_map", "lifetime_itegrate"):
+        if param_id not in ("lifetime_vmin", "lifetime_vmax", "lifetime_map", "lifetime_itegrate"):
             return
 
         if plot_type == "tau_map":
@@ -237,7 +158,6 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "tau_map"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "tau_map"), 1, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Integrate itensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "tau_map"), 1, 1)
-        grid_parameters.addLayout(self.colormap_settings("tau_map"), 2, 0, 1, 2)
         return grid_parameters
     
     def gallery_box(self):
@@ -248,7 +168,6 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "gallery"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "gallery"), 1, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Integrate itensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "gallery"), 1, 1)
-        grid_parameters.addLayout(self.colormap_settings("gallery"), 2, 0, 1, 2)
         return grid_parameters
     
     def violin_box(self):

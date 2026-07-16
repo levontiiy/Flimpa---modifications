@@ -1,7 +1,7 @@
 import os
 from PySide6.QtWidgets import (QStatusBar, QMenuBar, QFileDialog, QInputDialog, QFileDialog, QLineEdit, QLabel,QPushButton,
                                QProgressDialog, QApplication, QMessageBox, QComboBox, QVBoxLayout, QDialogButtonBox, QDialog,
-                               QRadioButton, QButtonGroup)
+                               QRadioButton, QButtonGroup, QHBoxLayout, QWidget, QToolBar, QToolButton)
 from PySide6.QtGui import QDoubleValidator
 
 from PySide6.QtCore import Qt, QTimer
@@ -12,6 +12,7 @@ from utils.shared_data import SharedData
 from utils import save_data 
 from utils.plot_imgs import PlotImages
 from utils.errors import DataProcessingError
+from utils.colormaps import LIFETIME_CMAP_PRESETS, clear_custom_colormap_cache
 from utils.mask_io import (
     apply_mask_to_sample,
     default_mask_filename,
@@ -101,7 +102,160 @@ class ToolBarComponents:
         file_menu.addSeparator()
         export_cv = file_menu.addAction("Export lifetime values table")
         export_cv.triggered.connect(self.save_csv)
-        
+
+        # Colormap + Baseline check on a real toolbar (visible on macOS; QMenuBar widgets are not)
+        self.setup_analysis_toolbar()
+
+    def setup_analysis_toolbar(self):
+        """Compact row under the menu: Colormap picker and Baseline check."""
+        toolbar = QToolBar("Analysis tools", self.main_window)
+        toolbar.setObjectName("analysisToolbar")
+        toolbar.setMovable(False)
+        toolbar.setFloatable(False)
+        toolbar.setIconSize(toolbar.iconSize())
+        toolbar.setStyleSheet("""
+            QToolBar#analysisToolbar {
+                background-color: rgb(40, 40, 40);
+                border: none;
+                border-bottom: 1px solid rgb(55, 55, 55);
+                spacing: 8px;
+                padding: 4px 10px;
+            }
+            QToolBar#analysisToolbar QLabel {
+                color: white;
+                padding-right: 2px;
+            }
+            QToolBar#analysisToolbar QComboBox {
+                background-color: rgb(63, 63, 63);
+                color: white;
+                padding: 2px 6px;
+                min-height: 22px;
+            }
+            QToolBar#analysisToolbar QPushButton,
+            QToolBar#analysisToolbar QToolButton {
+                color: white;
+                background-color: rgb(55, 55, 55);
+                border: 1px solid rgb(70, 70, 70);
+                border-radius: 3px;
+                padding: 4px 10px;
+            }
+            QToolBar#analysisToolbar QPushButton:hover,
+            QToolBar#analysisToolbar QToolButton:hover {
+                background-color: rgb(70, 70, 70);
+            }
+            QToolBar#analysisToolbar QToolButton:checked {
+                background-color: rgb(60, 162, 161);
+                border-color: rgb(60, 162, 161);
+            }
+        """)
+
+        cmap_label = QLabel("Colormap")
+        toolbar.addWidget(cmap_label)
+
+        self.cmap_combo = QComboBox()
+        self.cmap_combo.addItems(LIFETIME_CMAP_PRESETS + ["Custom"])
+        self.cmap_combo.setFixedWidth(150)
+        self.cmap_combo.setEditable(False)
+        self.cmap_combo.setCurrentText(self.shared_info.config.get("lifetime_cmap", "Rainbow"))
+        self.cmap_combo.setToolTip("Lifetime / phasor colour scale")
+        self.cmap_combo.currentIndexChanged.connect(self._on_colormap_preset_changed)
+        toolbar.addWidget(self.cmap_combo)
+
+        load_btn = QPushButton("Load custom...")
+        load_btn.setToolTip("Load a custom colormap from CSV/TXT or an image strip.")
+        load_btn.clicked.connect(self._on_load_custom_colormap)
+        toolbar.addWidget(load_btn)
+
+        toolbar.addSeparator()
+
+        self.baseline_check_action = QToolButton()
+        self.baseline_check_action.setText("Baseline check")
+        self.baseline_check_action.setCheckable(True)
+        self.baseline_check_action.setToolTip(
+            "Click pixels on Intensity display or Lifetime maps to inspect decay curves "
+            "(uses Pixel block size)."
+        )
+        self.baseline_check_action.toggled.connect(self._on_baseline_check_toggled)
+        toolbar.addWidget(self.baseline_check_action)
+
+        self.main_window.addToolBar(Qt.TopToolBarArea, toolbar)
+        self.analysis_toolbar = toolbar
+
+    def _on_colormap_preset_changed(self):
+        name = self.cmap_combo.currentText()
+        self.shared_info.config["lifetime_cmap"] = name
+        self._refresh_lifetime_colormap()
+
+    def _on_load_custom_colormap(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self.main_window,
+            "Select custom colormap",
+            "",
+            "Colormap files (*.csv *.txt *.png *.jpg *.jpeg *.tif *.tiff);;All files (*)",
+        )
+        if not path:
+            return
+        clear_custom_colormap_cache()
+        self.shared_info.config["lifetime_cmap_file"] = path
+        self.shared_info.config["lifetime_cmap"] = "Custom"
+        self.cmap_combo.blockSignals(True)
+        self.cmap_combo.setCurrentText("Custom")
+        self.cmap_combo.blockSignals(False)
+        self._refresh_lifetime_colormap()
+
+    def _refresh_lifetime_colormap(self):
+        """Redraw lifetime maps / gallery / phasor after a colormap change."""
+        if not self.shared_info.results_dict:
+            return
+        selected = self.shared_info.config.get("selected_file")
+        if selected and selected in self.shared_info.results_dict:
+            self.main_window.plotImages.plot_tau_map()
+            if not getattr(self.main_window.phasor_componets, "_is_gallery_active", lambda: False)():
+                self.main_window.phasor_componets.plot_phasor_coordinates()
+
+        tabs = getattr(self.main_window.ui_layout, "tabs_widget", None)
+        gallery_tab = False
+        if tabs is not None:
+            for i in range(tabs.count()):
+                if tabs.tabText(i) == "Gallery (tau)":
+                    gallery_tab = True
+                    break
+        if gallery_tab:
+            self.main_window.plotImages.gallery_imgs(data_dict=self.shared_info.results_dict)
+            if getattr(self.main_window.phasor_componets, "_is_gallery_active", lambda: False)():
+                if self.shared_info.phasor_settings.get("plot_type") == "individual":
+                    self.main_window.phasor_componets.plot_phasor_gallery_individual(
+                        data_dict=self.shared_info.results_dict
+                    )
+                else:
+                    self.main_window.phasor_componets.plot_phasor_gallery_condition(
+                        data_dict=self.shared_info.results_dict
+                    )
+
+    def _on_baseline_check_toggled(self, enabled: bool):
+        editor = getattr(self.main_window, "mask_editor", None)
+        if editor is None:
+            return
+        if enabled:
+            editor.activate_tool("inspect")
+            if editor._tool != "inspect":
+                self.baseline_check_action.blockSignals(True)
+                self.baseline_check_action.setChecked(False)
+                self.baseline_check_action.blockSignals(False)
+        elif editor._tool == "inspect":
+            editor.deactivate()
+
+    def sync_baseline_check_ui(self):
+        """Keep the toolbar Baseline check button in sync with the mask editor tool."""
+        editor = getattr(self.main_window, "mask_editor", None)
+        if editor is None or not hasattr(self, "baseline_check_action"):
+            return
+        checked = editor._tool == "inspect"
+        if self.baseline_check_action.isChecked() != checked:
+            self.baseline_check_action.blockSignals(True)
+            self.baseline_check_action.setChecked(checked)
+            self.baseline_check_action.blockSignals(False)
+
     def setup_statusbar(self):
         self.main_window.setStatusBar(QStatusBar(self.main_window))
 

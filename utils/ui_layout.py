@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton,
                                 QTableWidget, QWidget, QTabWidget, QSizePolicy, QScrollArea,
-                                QMessageBox, QDialog)
+                                QMessageBox, QDialog, QLabel)
+from PySide6.QtCore import Qt
 from utils.helper_functions import Helpers
 from utils.run_analysis import Analysis
 from utils.mask_instruments import wrap_plot_with_instruments
@@ -101,12 +102,24 @@ class UILayout:
         self.intensity_plot = wrap_plot_with_instruments(
             self.main_window.canvas, self.main_window, self
         )
-        # intensity_plot wraps canvas + floating Instruments overlay (no top toolbar row)
+        # intensity_plot wraps canvas + floating Masking overlay (no top toolbar row)
         layout_tabs.addWidget(self.intensity_plot)
         tabs_visualise_imgs.setLayout(layout_tabs)
         
         # initate tabs widget and define style
         self.tabs_widget.addTab(tabs_visualise_imgs, "Intensity display")
+
+        fret_tab = QWidget()
+        fret_tab.setStyleSheet("QWidget { background-color: rgb(18, 18, 18); }")
+        fret_layout = QVBoxLayout(fret_tab)
+        fret_placeholder = QLabel("FRET analysis — coming soon")
+        fret_placeholder.setAlignment(Qt.AlignCenter)
+        fret_placeholder.setStyleSheet("color: rgb(140, 140, 140); font-size: 14px;")
+        fret_layout.addStretch(1)
+        fret_layout.addWidget(fret_placeholder)
+        fret_layout.addStretch(1)
+        self.tabs_widget.addTab(fret_tab, "FRET")
+
         self.tabs_widget.setStyleSheet("""
             QTabWidget::pane { /* The tab widget frame */
                 border: 1px solid rgb(18, 18, 18);}

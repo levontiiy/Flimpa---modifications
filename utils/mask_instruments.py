@@ -1,6 +1,6 @@
-"""Floating Instruments control over intensity / lifetime plots.
+"""Floating Masking control over intensity / lifetime plots.
 
-Replaces the horizontal mask toolbar: one button + vertical popup over the image.
+One Masking button + vertical popup over the image.
 See docs/MASKING_MANUAL.md.
 """
 
@@ -172,7 +172,7 @@ class PlotZoomOverlay:
 
 class MaskInstrumentsOverlay:
     """
-    Single Instruments button + vertical popup anchored top-left on the plot host.
+    Single Masking button + vertical popup anchored top-left on the plot host.
     Does not block the rest of the canvas — only the button/panel receive clicks.
     """
 
@@ -182,7 +182,7 @@ class MaskInstrumentsOverlay:
         self.ui_layout = ui_layout
         self.editor = main_window.mask_editor
 
-        self.btn = QPushButton("Instruments ▾", host)
+        self.btn = QPushButton("Masking ▾", host)
         self.btn.setStyleSheet(_BTN_STYLE)
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self._toggle_popup)
@@ -196,9 +196,9 @@ class MaskInstrumentsOverlay:
         popup_layout.setContentsMargins(4, 4, 4, 4)
         popup_layout.setSpacing(2)
 
-        # Back exits the active instrument (e.g. inspect) and closes the menu
+        # Back exits the active masking tool and closes the menu
         back_btn = QPushButton("Back")
-        back_btn.setToolTip("Stop the current instrument and close this menu.")
+        back_btn.setToolTip("Stop the current masking tool and close this menu.")
         back_btn.clicked.connect(self._back_pressed)
         popup_layout.addWidget(back_btn)
 
@@ -207,7 +207,6 @@ class MaskInstrumentsOverlay:
             "Rectangle": "Drag a rectangle on the image.",
             "Lasso": "Draw a freehand outline.",
             "Brush": "Paint regions; start on existing region to extend it.",
-            "Inspect pixel": "Click pixels for decay curves. Choose Back or Inspect again to stop.",
             "Auto segment": "FLIMfit-style auto-segmentation, then refine manually.",
             "Erase": "Edit mask: Polygon / Rectangle / Lasso / Brush remove parts (set pixels to 0).",
             "Clear mask": "Remove all regions for this file.",
@@ -226,11 +225,6 @@ class MaskInstrumentsOverlay:
         brush_btn.setToolTip(tooltips["Brush"])
         brush_btn.clicked.connect(lambda: self._pick_tool("brush"))
         popup_layout.addWidget(brush_btn)
-
-        inspect_btn = QPushButton("Inspect pixel")
-        inspect_btn.setToolTip(tooltips["Inspect pixel"])
-        inspect_btn.clicked.connect(lambda: self._pick_tool("inspect"))
-        popup_layout.addWidget(inspect_btn)
 
         size_row = QWidget()
         size_layout = QVBoxLayout(size_row)
@@ -274,15 +268,13 @@ class MaskInstrumentsOverlay:
             self.popup.raise_()
 
     def _update_btn_label(self):
-        if self.editor._tool == "inspect":
-            self.btn.setText("Instruments · Inspect ▾")
-        elif self.antimask_btn.isChecked():
-            self.btn.setText("Instruments · Erase ▾")
+        if self.antimask_btn.isChecked():
+            self.btn.setText("Masking · Erase ▾")
         else:
-            self.btn.setText("Instruments ▾")
+            self.btn.setText("Masking ▾")
 
     def _back_pressed(self):
-        if self.editor._tool is not None:
+        if self.editor._tool is not None and self.editor._tool != "inspect":
             self.editor.deactivate()
             self._update_btn_label()
         self._close_popup()
@@ -302,15 +294,9 @@ class MaskInstrumentsOverlay:
         self.popup.hide()
 
     def _pick_tool(self, tool: str):
-        if tool == "inspect" and self.editor._tool == "inspect":
-            self.editor.deactivate()
-            self._update_btn_label()
-            self._close_popup()
-            return
         self.editor.activate_tool(tool)
         self._update_btn_label()
         self._close_popup()
-
     def _run_auto_segment(self):
         if not AUTO_SEGMENT_UI_ENABLED:
             return

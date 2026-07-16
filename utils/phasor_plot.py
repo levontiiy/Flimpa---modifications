@@ -109,12 +109,15 @@ class PhasorPlot(QWidget):
 
         # Layers panel — active in Gallery (tau) when Display is Individual or Condition
         self.legend_layout = QVBoxLayout()
+        self.legend_layout.setSpacing(4)
 
         layers_label = QLabel("Layers")
         layers_label.setStyleSheet("QLabel { color: dimgray; font-size: 11px; }")
         self.legend_layout.addWidget(layers_label)
 
         layer_buttons = QHBoxLayout()
+        layer_buttons.setContentsMargins(0, 0, 0, 0)
+        layer_buttons.setSpacing(4)
         self.btn_layer_up = QPushButton("▲")
         self.btn_layer_up.setFixedWidth(28)
         self.btn_layer_up.setToolTip("Move layer up (draw on top)")
@@ -141,8 +144,8 @@ class PhasorPlot(QWidget):
                 color: white;
                 }
                   """)
-        self.legend_layout.addStretch(1)
         self.legend_layout.addWidget(self.legendWidget)
+        self.legend_layout.addStretch(1)
 
         # Add legend_layout to the main layout
         self.layout.addLayout(self.legend_layout)

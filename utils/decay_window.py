@@ -1,4 +1,4 @@
-"""Movable secondary window for per-pixel decay curves (FLIMfit-style)."""
+"""Movable secondary window for per-pixel decay curves (baseline check)."""
 
 from __future__ import annotations
 
@@ -22,7 +22,6 @@ from utils.decay_inspector import PixelDecay, get_pixel_decay
 from utils.decay_fitting import (
     DecayFitResult,
     fit_single_exponential,
-    format_fit_equation,
     predict_decay_at_tau,
     shift_model_on_time_axis,
 )
@@ -102,7 +101,7 @@ class DecayCurveWindow(QMainWindow):
     def __init__(self, main_window):
         super().__init__(None)
         self.main_window = main_window
-        self.setWindowTitle("FLIMPA — Decay curve")
+        self.setWindowTitle("FLIMPA — Baseline check")
         self.setWindowFlags(
             Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint
         )
@@ -114,17 +113,10 @@ class DecayCurveWindow(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
-        self.info_label = QLabel("Select Instruments → Inspect pixel, then click on the image.")
+        self.info_label = QLabel("Enable Baseline check in the menu bar, then click on the image.")
         self.info_label.setWordWrap(True)
         self.info_label.setStyleSheet("color: rgb(200, 200, 200); padding: 4px;")
         layout.addWidget(self.info_label)
-
-        self.formula_label = QLabel("")
-        self.formula_label.setWordWrap(True)
-        self.formula_label.setStyleSheet(
-            "color: rgb(255, 200, 120); padding: 2px 4px; font-family: Menlo, Monaco, monospace; font-size: 11px;"
-        )
-        layout.addWidget(self.formula_label)
 
         self.figure = Figure(figsize=(5, 3.2), dpi=100, facecolor=_BG)
         self.canvas = FigureCanvas(self.figure)
@@ -166,28 +158,40 @@ class DecayCurveWindow(QMainWindow):
         controls.addStretch(1)
         layout.addLayout(controls)
 
-        controls2 = QHBoxLayout()
+        # --- Temporary test options (not final UI) ---
+        test_row = QHBoxLayout()
+        test_label = QLabel("Test:")
+        test_label.setStyleSheet("color: rgb(255, 180, 80);")
+        test_row.addWidget(test_label)
+
         self.peak_align_check = QCheckBox("Align model peak to data")
         self.peak_align_check.setStyleSheet("color: white;")
         self.peak_align_check.setChecked(True)
         self.peak_align_check.setToolTip(
-            "Shift the orange fit (and map model base) so the model peak matches the data peak."
+            "TEST: shift IRF⊗exp / map model so its peak matches the measured peak."
         )
         self.peak_align_check.toggled.connect(self._redraw_last)
-        controls2.addWidget(self.peak_align_check)
+        test_row.addWidget(self.peak_align_check)
+
+        self.use_irf_check = QCheckBox("Use IRF")
+        self.use_irf_check.setStyleSheet("color: white;")
+        self.use_irf_check.setChecked(True)
+        self.use_irf_check.setToolTip(
+            "Test: off = pure exponential (instant rise at t=0); on = IRF reconvolution if reference loaded."
+        )
+        self.use_irf_check.toggled.connect(self._redraw_last)
+        test_row.addWidget(self.use_irf_check)
 
         map_shift_label = QLabel("Map τ slide:")
         map_shift_label.setStyleSheet("color: white;")
-        controls2.addWidget(map_shift_label)
+        test_row.addWidget(map_shift_label)
 
         self.map_shift_slider = QSlider(Qt.Horizontal)
         self.map_shift_slider.setRange(-500, 500)
         self.map_shift_slider.setValue(0)
-        self.map_shift_slider.setToolTip(
-            "Slide the purple map-τ curve left (−) or right (+) in time (display only; ±5 ns)."
-        )
+        self.map_shift_slider.setToolTip("Test: slide purple map-τ curve ±5 ns (display only).")
         self.map_shift_slider.valueChanged.connect(self._on_map_shift_slider_changed)
-        controls2.addWidget(self.map_shift_slider, stretch=1)
+        test_row.addWidget(self.map_shift_slider, stretch=1)
 
         self.map_shift_spin = QDoubleSpinBox()
         self.map_shift_spin.setRange(-_MAP_SHIFT_MAX_NS, _MAP_SHIFT_MAX_NS)
@@ -195,22 +199,19 @@ class DecayCurveWindow(QMainWindow):
         self.map_shift_spin.setSingleStep(0.05)
         self.map_shift_spin.setSuffix(" ns")
         self.map_shift_spin.setKeyboardTracking(False)
-        self.map_shift_spin.setToolTip(
-            "Type a time shift for the purple map-τ curve, or use the slider (display only; ±5 ns)."
-        )
         self.map_shift_spin.setStyleSheet(
             "color: rgb(180, 140, 255); background: rgb(40, 40, 40); padding: 2px;"
         )
         self.map_shift_spin.valueChanged.connect(self._on_map_shift_spin_changed)
-        controls2.addWidget(self.map_shift_spin)
+        test_row.addWidget(self.map_shift_spin)
 
         self.map_shift_reset_btn = QPushButton("Reset")
         self.map_shift_reset_btn.setToolTip("Reset map curve slide to 0 ns")
         self.map_shift_reset_btn.clicked.connect(self._reset_map_shift)
-        controls2.addWidget(self.map_shift_reset_btn)
+        test_row.addWidget(self.map_shift_reset_btn)
 
-        controls2.addStretch(1)
-        layout.addLayout(controls2)
+        test_row.addStretch(1)
+        layout.addLayout(test_row)
 
         self._map_shift_ns = 0.0
 
@@ -232,14 +233,12 @@ class DecayCurveWindow(QMainWindow):
         shift_ns = float(np.clip(shift_ns, -_MAP_SHIFT_MAX_NS, _MAP_SHIFT_MAX_NS))
         self._map_shift_ns = shift_ns
         slider_val = int(round(shift_ns * _MAP_SHIFT_SLIDER_SCALE))
-
         self.map_shift_slider.blockSignals(True)
         self.map_shift_spin.blockSignals(True)
         self.map_shift_slider.setValue(slider_val)
         self.map_shift_spin.setValue(shift_ns)
         self.map_shift_slider.blockSignals(False)
         self.map_shift_spin.blockSignals(False)
-
         if redraw:
             self._redraw_last()
 
@@ -253,7 +252,6 @@ class DecayCurveWindow(QMainWindow):
         self._set_map_shift_ns(0.0, redraw=True)
 
     def _reset_map_shift_silent(self):
-        """New pixel: clear slide without an extra redraw."""
         self._set_map_shift_ns(0.0, redraw=False)
 
     def _connect_cursor_handlers(self):
@@ -396,7 +394,6 @@ class DecayCurveWindow(QMainWindow):
         for spine in ax.spines.values():
             spine.set_color("white")
         self._clear_time_cursor()
-        self.formula_label.setText("")
         self.figure.tight_layout()
         self._store_plot_limits(ax)
         self.canvas.draw_idle()
@@ -419,16 +416,18 @@ class DecayCurveWindow(QMainWindow):
         if not self.align_t0_check.isEnabled():
             self.align_t0_check.setChecked(False)
 
-        peak_align = self.peak_align_check.isChecked()
-        map_shift_ns = self._map_shift_ns
         has_map_tau = decay.tau_ns is not None and decay.tau_ns > 0
+        peak_align = self.peak_align_check.isChecked()
+        use_irf = self.use_irf_check.isChecked()
+        map_shift_ns = self._map_shift_ns
         self.map_shift_slider.setEnabled(has_map_tau and self.show_map_tau_check.isChecked())
         self.map_shift_spin.setEnabled(self.map_shift_slider.isEnabled())
         self.map_shift_reset_btn.setEnabled(self.map_shift_slider.isEnabled())
 
         if decay.fit_allowed and t0_ns is not None:
             self._last_fit = fit_single_exponential(
-                t, y, tau_hint_ns=decay.tau_ns, t0_ns=t0_ns, peak_align=peak_align,
+                t, y, tau_hint_ns=decay.tau_ns, t0_ns=t0_ns,
+                peak_align=peak_align, use_irf=use_irf,
             )
             fit = self._last_fit
         else:
@@ -486,6 +485,7 @@ class DecayCurveWindow(QMainWindow):
                 t, y, decay.tau_ns,
                 t0_ns=t0_ns,
                 peak_align=peak_align,
+                use_irf=use_irf,
             )
         else:
             self.show_map_tau_check.setEnabled(False)
@@ -540,56 +540,27 @@ class DecayCurveWindow(QMainWindow):
         ax.grid(True, alpha=0.2, color="gray")
 
         parts = [
+            f"pixel (x={decay.x}, y={decay.y})",
             f"Σ photons = {decay.total_photons:,}",
-            f"avg / channel = {decay.total_photons / max(len(y), 1):.1f}",
         ]
+        if decay.block_size > 1:
+            parts.append(f"{decay.block_size}×{decay.block_size} block")
         if decay.tau_ns is not None:
             parts.append(f"τ map ≈ {decay.tau_ns:.2f} ns")
-        y_peak = float(np.max(y)) if y.size else 0.0
         if fit is not None:
             parts.append(f"fit τ = {fit.tau_ns:.2f} ns")
-            if fit.tau_ma_ns is not None:
-                parts.append(f"τ mean estimate = {fit.tau_ma_ns:.2f} ns")
-            parts.append(f"χ²ᵣ = {fit.chi2_reduced:.2f}")
-            parts.append(fit.message)
-            if fit.hit_tau_lower_bound or fit.hit_tau_upper_bound:
-                parts.append("⚠ fit τ at search limit — trust τ map")
-            self.formula_label.setText(format_fit_equation(
-                fit, used_irf=fit.used_irf, data_peak=y_peak,
-            ))
-        else:
-            self.formula_label.setText("")
-            if not decay.fit_allowed:
-                self.formula_label.setText(
-                    "τ fit: enable Baseline correction and set % time channels (baseline corr.) "
-                    "to define t₀ — then re-open this pixel."
-                )
-        if decay.tau_ns is not None and fit is not None and decay.tau_ns > 0:
             if fit.used_irf:
-                map_eq = f"Map: y = A·exp(−(t−t₀)/τ_map) ⊗ IRF    τ_map = {decay.tau_ns:.2f} ns"
+                parts.append("IRF on")
             else:
-                map_eq = f"Map: y = A·exp(−(t−t₀)/τ_map)    τ_map = {decay.tau_ns:.2f} ns"
-            if abs(map_shift_ns) > 1e-12:
-                map_eq += f"    slide Δt = {map_shift_ns:+.2f} ns"
-            if self.formula_label.text():
-                self.formula_label.setText(self.formula_label.text() + "\n" + map_eq)
-        if decay.baseline_corrected:
-            if decay.t0_ns is not None and decay.baseline_fraction_pct is not None:
-                parts.append(
-                    f"baseline corrected ({decay.baseline_fraction_pct:g}% early bins; "
-                    f"t₀ = {decay.t0_ns:.2f} ns — τ fit uses bins at/after t₀ only)"
-                )
-                if align_at_t0:
-                    parts.append("plot time axis shifted: t = 0 at t₀")
-            else:
-                parts.append("baseline corrected (t₀ undefined — check % time channels)")
+                parts.append("IRF off")
+            if abs(fit.peak_shift_ns) > 1e-6:
+                parts.append(f"peak Δt = {fit.peak_shift_ns:.2f} ns")
+        if peak_align:
+            parts.append("peak-align on")
+        if abs(map_shift_ns) > 1e-12:
+            parts.append(f"map slide = {map_shift_ns:+.2f} ns")
         if decay.masked_out:
             parts.append("outside mask or zero signal")
-        if decay.total_photons < 500:
-            parts.append("single-pixel curve is sparse — try Log scale or a brighter pixel")
-        if abs(map_shift_ns) > 1e-12:
-            parts.append(f"map curve slide = {map_shift_ns:+.2f} ns (display only)")
-        parts.append("click & drag: delay as % of window (0% = left, 100% = right)")
         self.info_label.setText("  |  ".join(parts))
 
         self._clear_time_cursor()
