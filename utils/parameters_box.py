@@ -79,6 +79,8 @@ class ParameterWidgets():
             self.main_window.plotImages.update_mask_for_current_image()  # Call update_mask_for_current_image when min_photons is updated
         elif param_id =="frequency":
             self.main_window.phasor_componets.add_plot()
+        elif param_id == "ref_lifetime" and self.shared_info.results_dict:
+            self.main_window.plotImages.plot_fret_map()
 
     
     def update_ref_file(self, ref_filenames):
@@ -111,7 +113,18 @@ class ParameterWidgets():
         grid_parameters.addLayout(self.parameter_input(param_name="Min. photon counts", param_id="min_photons", ), 0, 1)
         grid_parameters.addLayout(self.parameter_input(param_name="Max. photon counts", param_id="max_photons"), 1, 1)
         grid_parameters.addLayout(self.parameter_input(param_name="Reference file", input_type="combobox", items=["None"], param_id="ref_file"), 1, 0)
-        grid_parameters.addLayout(self.parameter_input(param_name="Reference lifetime (ns)", param_id="ref_lifetime"), 2, 0)
+        grid_parameters.addLayout(
+            self.parameter_input(
+                param_name="Reference lifetime (ns)",
+                param_id="ref_lifetime",
+                tooltip=(
+                    "Donor-only lifetime tau_D (ns). Default 4 ns for Rhodamine 6G (Rhod6G). "
+                    "Used for phasor reference correction and FRET efficiency: E = 1 - tau/tau_D."
+                ),
+            ),
+            2,
+            0,
+        )
         grid_parameters.addLayout(
             self.parameter_input(
                 param_name="Pixel block size",

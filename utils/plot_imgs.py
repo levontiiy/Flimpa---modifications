@@ -8,6 +8,7 @@ import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from utils.shared_data import SharedData 
 from utils.colormaps import resolve_lifetime_cmap
+from utils.fret_calc import compute_fret_efficiency
 from utils.mask_viz import draw_mask_overlay
 from utils.plot_pan import apply_image_limits, capture_image_limits
 import warnings
@@ -28,6 +29,9 @@ class PlotImages():
         # lifetime images (single)
         self.canvas_tau = self.main_window.canvas_tau
         self.figure_tau  = self.main_window.figure_tau
+        # FRET efficiency map
+        self.canvas_fret = self.main_window.canvas_fret
+        self.figure_fret = self.main_window.figure_fret
         # lifetime gallery images
         self.canvas_gallery = self.main_window.canvas_gallery
         self.figure_gallery  = self.main_window.figure_gallery
@@ -217,13 +221,6 @@ class PlotImages():
         img_plot = ax.imshow(tau_img, cmap=tau_cmap,
                              vmin=float(self.shared_info.config["lifetime_vmin"]), vmax=float(self.shared_info.config["lifetime_vmax"]))
         ax.set_title(self.shared_info.config["selected_file"], color='white', fontsize=10)
-        
-        # optional: integrate lifetime image with intensity image
-        if self.shared_info.config["lifetime_itegrate"] == "True":
-            intenisty = self.shared_info.results_dict.get(self.shared_info.config["selected_file"])["sample_data"].sum(0)
-            ax.imshow(intenisty, cmap='gray', vmin=0, vmax=int(intenisty[intenisty!=0].max()-intenisty[intenisty!=0].mean()),  alpha = 0.6)
-        else:
-            pass
 
         ax.patch.set_facecolor((0, 0, 0, 1.0))
 
@@ -255,7 +252,84 @@ class PlotImages():
 
         self.canvas_tau.draw()
         self.canvas_tau.figure.tight_layout()
-    
+
+    def plot_fret_map(self, preserve_mask_tool=False):
+        """Plot FRET efficiency map: E = 1 - tau/tau_D (tau_D from ref_lifetime)."""
+        saved_limits = capture_image_limits(self.canvas_fret) if preserve_mask_tool else None
+        self.figure_fret.clear()
+
+        selected = self.shared_info.config.get("selected_file")
+        if not selected or selected not in self.shared_info.results_dict:
+            ax = self.figure_fret.add_subplot(111)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.text(
+                0.5,
+                0.5,
+                "Run phasor analysis to compute FRET",
+                ha="center",
+                va="center",
+                color="white",
+                transform=ax.transAxes,
+            )
+            ax.patch.set_facecolor((0, 0, 0, 1.0))
+            self.canvas_fret.draw()
+            return
+
+        tau = self.shared_info.results_dict[selected][self.shared_info.config["lifetime_map"]]
+        x_dim, y_dim = self.shared_info.results_dict[selected]["img_shape"][1:]
+
+        tau_ns = np.reshape(tau * 1e9, (x_dim, y_dim)).astype("float")
+        tau_fluorophore_ns = float(self.shared_info.config.get("ref_lifetime", 4) or 4)
+        fret_img = compute_fret_efficiency(tau_ns, tau_fluorophore_ns)
+
+        ax = self.figure_fret.add_subplot(111)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        self.main_window.mask_editor.load_mask_for_current_file()
+        self.main_window.mask_editor.set_axes(ax)
+        if not preserve_mask_tool:
+            self.main_window.mask_editor.deactivate()
+
+        manual_mask = self.shared_info.raw_data_dict.get(selected, {}).get("mask_arr")
+        if manual_mask is None and self.main_window.mask_editor.mask is not None:
+            manual_mask = self.main_window.mask_editor.mask
+
+        img_plot = ax.imshow(
+            fret_img,
+            cmap="viridis",
+            vmin=float(self.shared_info.config["fret_vmin"]),
+            vmax=float(self.shared_info.config["fret_vmax"]),
+        )
+        ax.set_title(
+            f"{selected}  (E = 1 - τ/τ_D, τ_D = {tau_fluorophore_ns:g} ns)",
+            color="white",
+            fontsize=10,
+        )
+
+        ax.patch.set_facecolor((0, 0, 0, 1.0))
+
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = self.figure_fret.colorbar(img_plot, cax=cax, orientation="vertical")
+        cbar.set_label("FRET efficiency (E)", color="white", fontsize=8)
+        cbar.ax.tick_params(colors="white", labelsize=8)
+
+        draw_mask_overlay(ax, manual_mask)
+        apply_image_limits(ax, saved_limits)
+
+        editor = self.main_window.mask_editor
+        if preserve_mask_tool and editor._tool == "inspect":
+            editor._setup_inspect()
+        elif preserve_mask_tool and editor._tool == "brush":
+            editor._setup_brush()
+        elif preserve_mask_tool and editor._inspect_xy is not None:
+            editor._draw_inspect_marker()
+
+        self.canvas_fret.draw()
+        self.canvas_fret.figure.tight_layout()
+
     
     
 
@@ -307,13 +381,6 @@ class PlotImages():
             im = ax_gal.imshow(tau_img, cmap=tau_cmap,
                             vmin=float(self.shared_info.config["lifetime_vmin"]),
                             vmax=float(self.shared_info.config["lifetime_vmax"]))
-
-            # optional: integrate lifetime image with intensity image
-            if self.shared_info.config["lifetime_itegrate"] == "True":
-                intenisty = data_dict[key]["sample_data"].sum(0)
-                ax_gal.imshow(intenisty, cmap='gray', vmin=0,
-                            vmax=int(intenisty[intenisty != 0].max() - intenisty[intenisty != 0].mean()),
-                            alpha=0.5)
 
             images.append(im)  # Add the image to the list
             fontsize = 8 if len(key) < 25 else 6

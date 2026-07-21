@@ -111,13 +111,17 @@ class UILayout:
 
         fret_tab = QWidget()
         fret_tab.setStyleSheet("QWidget { background-color: rgb(18, 18, 18); }")
-        fret_layout = QVBoxLayout(fret_tab)
-        fret_placeholder = QLabel("FRET analysis — coming soon")
-        fret_placeholder.setAlignment(Qt.AlignCenter)
-        fret_placeholder.setStyleSheet("color: rgb(140, 140, 140); font-size: 14px;")
-        fret_layout.addStretch(1)
-        fret_layout.addWidget(fret_placeholder)
-        fret_layout.addStretch(1)
+        self.layout_fret = QVBoxLayout()
+        self.layout_fret.setContentsMargins(0, 0, 0, 0)
+        self.fret_plot = wrap_plot_with_instruments(
+            self.main_window.canvas_fret, self.main_window, self
+        )
+        self.layout_fret.addWidget(self.fret_plot, 1)
+        self.layout_fret.addLayout(
+            self.main_window.tab_settings.input_layout(box_type="fret_box"), 0
+        )
+        fret_tab.setLayout(self.layout_fret)
+        self.main_window.plotImages.plot_fret_map()
         self.tabs_widget.addTab(fret_tab, "FRET")
 
         self.tabs_widget.setStyleSheet("""

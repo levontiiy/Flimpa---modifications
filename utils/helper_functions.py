@@ -18,6 +18,7 @@ class Helpers:
         if self.shared_info.results_dict != {}:
             self.main_window.plotImages.plot_tau_map(masked_image=None)
             self.main_window.phasor_componets.plot_phasor_coordinates()
+            self.main_window.plotImages.plot_fret_map()
 
     def _all_files_selected(self):
         """True when every file-table checkbox is checked (analyse: yes)."""
@@ -118,6 +119,13 @@ class Helpers:
             self.main_window.canvas_tau.draw()
 
         except: 
+            pass
+
+    def resizeFret(self):
+        try:
+            self.main_window.plotImages.plot_fret_map()
+            self.main_window.canvas_fret.draw()
+        except:
             pass
     
     def resizeViolin(self):

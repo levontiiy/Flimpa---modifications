@@ -79,14 +79,24 @@ class TabSettingsWidgets():
 
         return h_layout_parameters
 
+    def _refresh_fret_visuals(self, plot_type, param_id):
+        if param_id not in (
+            "ref_lifetime",
+            "fret_vmin",
+            "fret_vmax",
+            "lifetime_map",
+        ):
+            return
+        if plot_type == "fret_map":
+            self.main_window.plotImages.plot_fret_map()
+
     def _refresh_lifetime_visuals(self, plot_type, param_id):
-        if param_id not in ("lifetime_vmin", "lifetime_vmax", "lifetime_map", "lifetime_itegrate"):
+        if param_id not in ("lifetime_vmin", "lifetime_vmax", "lifetime_map"):
             return
 
         if plot_type == "tau_map":
             self.main_window.plotImages.plot_tau_map()
-            if param_id != "lifetime_itegrate":
-                self.main_window.phasor_componets.plot_phasor_coordinates()
+            self.main_window.phasor_componets.plot_phasor_coordinates()
         elif plot_type == "gallery":
             self.main_window.plotImages.gallery_imgs(data_dict=self.shared_info.results_dict)
             if getattr(self.main_window.phasor_componets, "_is_gallery_active", lambda: False)():
@@ -139,6 +149,12 @@ class TabSettingsWidgets():
                 self.main_window.plotImages.gallery_imgs_I(data_dict=self.shared_info.results_dict)
             elif param_id.split("_")[0] == "lifetime":
                 self._refresh_lifetime_visuals(plot_type, param_id)
+                if plot_type == "fret_map":
+                    self._refresh_fret_visuals(plot_type, param_id)
+            elif param_id == "ref_lifetime":
+                self._refresh_fret_visuals("fret_map", param_id)
+            elif param_id.split("_")[0] == "fret":
+                self._refresh_fret_visuals(plot_type, param_id)
             elif param_id == "tau_violin":
                 self.main_window.plotImages.violin_plots()
 
@@ -157,9 +173,52 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Min. lifetime (ns)", param_id="lifetime_vmin", plot_type = "tau_map"), 0, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "tau_map"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "tau_map"), 1, 0)
-        grid_parameters.addLayout(self.input_parameters(param_name="Integrate itensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "tau_map"), 1, 1)
         return grid_parameters
     
+    def fret_box(self):
+        grid_parameters = QGridLayout()
+        grid_parameters.setHorizontalSpacing(6)
+        grid_parameters.setVerticalSpacing(6)
+        grid_parameters.addLayout(
+            self.input_parameters(
+                param_name="Donor τ_D (ns)",
+                param_id="ref_lifetime",
+                plot_type="fret_map",
+            ),
+            0,
+            0,
+        )
+        grid_parameters.addLayout(
+            self.input_parameters(
+                param_name="Lifetime map",
+                input_type="combobox",
+                items=["average", "M", "phi"],
+                param_id="lifetime_map",
+                plot_type="fret_map",
+            ),
+            0,
+            1,
+        )
+        grid_parameters.addLayout(
+            self.input_parameters(
+                param_name="Min. display range",
+                param_id="fret_vmin",
+                plot_type="fret_map",
+            ),
+            1,
+            0,
+        )
+        grid_parameters.addLayout(
+            self.input_parameters(
+                param_name="Max. display range",
+                param_id="fret_vmax",
+                plot_type="fret_map",
+            ),
+            1,
+            1,
+        )
+        return grid_parameters
+
     def gallery_box(self):
         grid_parameters = QGridLayout()
         grid_parameters.setHorizontalSpacing(6)
@@ -167,7 +226,6 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Min. lifetime (ns)", param_id="lifetime_vmin", plot_type = "gallery"), 0, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "gallery"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "gallery"), 1, 0)
-        grid_parameters.addLayout(self.input_parameters(param_name="Integrate itensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "gallery"), 1, 1)
         return grid_parameters
     
     def violin_box(self):
@@ -192,6 +250,8 @@ class TabSettingsWidgets():
             input_group_box.setLayout(self.input_box())
         elif box_type == 'lifetime_box':
             input_group_box.setLayout(self.lifetime_box())
+        elif box_type == 'fret_box':
+            input_group_box.setLayout(self.fret_box())
         elif box_type == 'gallery_box':
             input_group_box.setLayout(self.gallery_box())
         elif box_type == 'violin_box':

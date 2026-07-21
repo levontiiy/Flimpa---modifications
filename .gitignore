@@ -1,3 +1,14 @@
+# Large third-party / reference trees (not used to run FLIMPA)
+FLIMFIT/
+
+# Local dev backups and extra test data (not part of the app distribution)
+backups/
+New_data_1/
+
+# iCloud duplicate copies
+* 2.*
+* 2.py
+
 # Virtual environments
 flimpa_env/
 .venv

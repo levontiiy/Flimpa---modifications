@@ -66,6 +66,10 @@ class MainWindow(QMainWindow):
         self.figure_tau = Figure(figsize=(6, 6), dpi=self.fixed_dpi,  facecolor=(18/255, 18/255, 18/255))
         self.canvas_tau = FigureCanvas(self.figure_tau)
 
+        # initialise FRET efficiency map
+        self.figure_fret = Figure(figsize=(6, 6), dpi=self.fixed_dpi, facecolor=(18/255, 18/255, 18/255))
+        self.canvas_fret = FigureCanvas(self.figure_fret)
+
         # initialise gallery image
         self.figure_gallery = Figure(figsize=(6, 6),  dpi=self.fixed_dpi, layout="compressed", facecolor=(18/255, 18/255, 18/255))
         self.canvas_gallery = FigureCanvas(self.figure_gallery)
@@ -105,6 +109,7 @@ class MainWindow(QMainWindow):
 
         if lifetime_maps_tab_index is not None:
             self.plotImages.plot_tau_map()
+            self.plotImages.plot_fret_map()
             self.phasor_componets.plot_phasor_coordinates()
             # If the "Parameters" tab already exists, update the table widget
             self.table_widget = self.ui_layout.tabs_widget.widget(parameters_tab_index).layout().itemAt(0).widget()
@@ -208,6 +213,10 @@ class MainWindow(QMainWindow):
             self.phasor_componets.plot_phasor_coordinates()
             self.shared_info.last_active_tab = current_tab_name
 
+        elif self.ui_layout.tabs_widget.tabText(index) == "FRET":
+            self.plotImages.plot_fret_map()
+            self.shared_info.last_active_tab = current_tab_name
+
         elif self.ui_layout.tabs_widget.tabText(index) == "Gallery (tau)":
             #print(f"Plot type updated to: {self.shared_info.phasor_settings['plot_type']}")
             if self.shared_info.phasor_settings["plot_type"] == "individual":
@@ -233,6 +242,8 @@ class MainWindow(QMainWindow):
                 self.helpers.resizeIntensity()
             elif self.ui_layout.tabs_widget.tabText(currentIndex) == "Lifetime maps":
                 self.helpers.resizeTau()
+            elif self.ui_layout.tabs_widget.tabText(currentIndex) == "FRET":
+                self.helpers.resizeFret()
             elif self.ui_layout.tabs_widget.tabText(currentIndex) == "Gallery (tau)":
                 self.helpers.resizeGallery()
             elif self.ui_layout.tabs_widget.tabText(currentIndex) == "Gallery (I)":

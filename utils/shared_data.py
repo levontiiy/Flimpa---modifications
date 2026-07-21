@@ -51,7 +51,7 @@ class SharedData:
         bins: "3x3" # spatial pixel block size (UI: Pixel block size), e.g. 3x3 neighbours averaged
 
         ref_file: "None"
-        ref_lifetime: 4
+        ref_lifetime: 4 # donor-only lifetime tau_D (ns); default Rhod6G; used for FRET E = 1 - tau/tau_D
 
         subtract_offset: "False" # set True to calculate the intensity offset (baseline)
         # earliest delay-time channels (along decay) assumed to hold background only
@@ -66,11 +66,13 @@ class SharedData:
         lifetime_vmin: 0
         lifetime_vmax: 10
         lifetime_map: "average"
-        lifetime_itegrate: "False"
         lifetime_cmap: "Rainbow" # preset name or "Custom" — see utils/colormaps.py
         lifetime_cmap_file: "None" # path when lifetime_cmap is Custom; else ignored
 
         tau_violin: "average"
+
+        fret_vmin: 0
+        fret_vmax: 1
         """
 
         # Load and parse the YAML content into a Python dictionary
