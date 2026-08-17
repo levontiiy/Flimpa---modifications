@@ -124,7 +124,7 @@ Menus: **Load data**, **Reference**, **Masking**, **Save**.
 
 *Video: general features — overview of the app after data are loaded*
 
-![General features](assets/general_features.mp4)
+![General features](assets/general_features.gif)
 
 ## Importing data
 
@@ -156,7 +156,7 @@ FLIMPA currently accepts single files, not time-lapse series.
 
 *Video: upload files — importing samples (and conditions if you use them)*
 
-![Upload files](assets/upload_files.mp4)
+![Upload files](assets/upload_files.gif)
 
 ## Running phasor plot analysis
 
@@ -221,7 +221,7 @@ In the window:
 
 *Video: decay curve — Baseline check on a lifetime-map pixel*
 
-![Decay curve](assets/decay_curve.mp4)
+![Decay curve](assets/decay_curve.gif)
 
 ## FRET
 
@@ -295,7 +295,7 @@ Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Pl
 
 *Video: polygon masking — drawing a manual mask on the image*
 
-![Polygon masking](assets/polygon_masking.mp4)
+![Polygon masking](assets/polygon_masking.gif)
 
 ## Phasor ROI mask
 
@@ -306,7 +306,7 @@ Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Pl
 
 *Video: ROI masking — ellipse on the phasor plot, then save*
 
-![ROI masking](assets/roi_masking.mp4)
+![ROI masking](assets/roi_masking.gif)
 
 ## Saving and clearing masks
 
