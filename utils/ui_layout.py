@@ -102,8 +102,10 @@ class UILayout:
         self.intensity_plot = wrap_plot_with_instruments(
             self.main_window.canvas, self.main_window, self
         )
-        # intensity_plot wraps canvas + floating Masking overlay (no top toolbar row)
-        layout_tabs.addWidget(self.intensity_plot)
+        layout_tabs.addWidget(self.intensity_plot, 1)
+        layout_tabs.addLayout(
+            self.main_window.tab_settings.input_layout(box_type="intensity_box"), 0
+        )
         tabs_visualise_imgs.setLayout(layout_tabs)
         
         # initate tabs widget and define style

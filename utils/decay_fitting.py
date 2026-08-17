@@ -5,10 +5,9 @@ TCSPC model: IRF reconvolution + Poisson deviance, for one ROI/pixel.
 
 ---
 FUTURE / NOT IN UI:
-  Fitting is implemented here but is not shown in Baseline check (no orange fit,
-  map-τ overlay, IRF / peak-align / slide controls). Baseline check still plots
-  the measured decay only.
-  To restore fit overlays, set DECAY_FIT_UI_ENABLED = True and keep the controls
+  The orange 1-exp fitted curve, IRF toggle, and peak-align controls stay hidden.
+  Baseline check still shows the measured decay and the purple map-τ overlay
+  (slidable). Set DECAY_FIT_UI_ENABLED = True to restore the extra fit controls
   in utils/decay_window.py.
 """
 

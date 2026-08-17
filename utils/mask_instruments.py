@@ -1,7 +1,7 @@
 """Floating Masking control over intensity / lifetime plots.
 
 One Masking button + vertical popup over the image.
-See docs/MASKING_MANUAL.md.
+See README.md (Masking).
 """
 
 from __future__ import annotations
@@ -19,6 +19,12 @@ from PySide6.QtWidgets import (
 )
 
 from utils.auto_segmentation import AUTO_SEGMENT_UI_ENABLED
+from utils.ui_icons import (
+    NAV_BUTTON_GAP,
+    NAV_BUTTON_MARGIN,
+    apply_nav_button_chrome,
+    apply_nav_icon,
+)
 
 _ZOOM_FACTOR = 1.35
 
@@ -116,16 +122,10 @@ class PlotZoomOverlay:
 
         self.zoom_out_btn = QPushButton("−", host)
         self.zoom_in_btn = QPushButton("+", host)
-        self.zoom_reset_btn = QPushButton("⌂", host)
-        for btn, tip in (
-            (self.zoom_out_btn, "Zoom out"),
-            (self.zoom_in_btn, "Zoom in"),
-            (self.zoom_reset_btn, "Reset zoom"),
-        ):
-            btn.setFixedSize(28, 28)
-            btn.setStyleSheet(_BTN_STYLE)
-            btn.setToolTip(tip)
-            btn.setCursor(Qt.PointingHandCursor)
+        self.zoom_reset_btn = QPushButton(host)
+        apply_nav_button_chrome(self.zoom_out_btn, "Zoom out")
+        apply_nav_button_chrome(self.zoom_in_btn, "Zoom in")
+        apply_nav_icon(self.zoom_reset_btn, "home.svg", "Reset view")
         self.zoom_out_btn.clicked.connect(lambda: self._apply_zoom(1 / _ZOOM_FACTOR))
         self.zoom_in_btn.clicked.connect(lambda: self._apply_zoom(_ZOOM_FACTOR))
         self.zoom_reset_btn.clicked.connect(self._reset_zoom)
@@ -154,8 +154,8 @@ class PlotZoomOverlay:
         self.canvas.draw_idle()
 
     def reposition(self):
-        margin = 8
-        gap = 4
+        margin = NAV_BUTTON_MARGIN
+        gap = NAV_BUTTON_GAP
         all_buttons = []
         if self._pan is not None:
             all_buttons.append(self._pan.pan_btn)

@@ -7,13 +7,16 @@ Overlay colours match FLIMPA teal theme; SELECT_* used while drawing tools are a
 import numpy as np
 from matplotlib import colormaps
 from PIL import Image
-from scipy.ndimage import measurements
+from scipy.ndimage import center_of_mass
 
 
 MASK_EDGE_COLOR = "#3ca2a1"
 MASK_FILL_CMAP = "spring"
+MASK_FILL_ALPHA = 0.28
+MASK_EDGE_ALPHA = 0.70
+MASK_EDGE_WIDTH = 1.4
 SELECT_COLOR = "#FFE066"
-SELECT_FILL = (1.0, 0.88, 0.4, 0.3)
+SELECT_FILL = (1.0, 0.88, 0.4, 0.28)
 
 
 def resize_mask(mask, target_shape):
@@ -53,7 +56,7 @@ def draw_mask_overlay(ax, manual_mask, show_labels=True):
     ax.imshow(
         filled,
         cmap=colormaps[MASK_FILL_CMAP],
-        alpha=0.45,
+        alpha=MASK_FILL_ALPHA,
         vmin=0,
         vmax=vmax,
         interpolation="nearest",
@@ -66,20 +69,37 @@ def draw_mask_overlay(ax, manual_mask, show_labels=True):
             if region == 0:
                 continue
             for contour in measure.find_contours(mask == region, 0.5):
-                ax.plot(contour[:, 1], contour[:, 0], color=MASK_EDGE_COLOR, linewidth=2.2, solid_capstyle="round")
+                ax.plot(
+                    contour[:, 1], contour[:, 0],
+                    color=MASK_EDGE_COLOR,
+                    alpha=MASK_EDGE_ALPHA,
+                    linewidth=MASK_EDGE_WIDTH,
+                    solid_capstyle="round",
+                )
     except ImportError:
         binary = np.where(mask > 0, 1, 0)
-        ax.contour(binary, levels=[0.5], colors=[MASK_EDGE_COLOR], linewidths=2.2)
+        ax.contour(
+            binary,
+            levels=[0.5],
+            colors=[MASK_EDGE_COLOR],
+            linewidths=MASK_EDGE_WIDTH,
+            alpha=MASK_EDGE_ALPHA,
+        )
 
     if show_labels:
         for region in np.unique(mask):
             if region == 0:
                 continue
             region_mask = mask == region
-            cy, cx = measurements.center_of_mass(region_mask)
+            cy, cx = center_of_mass(region_mask)
             ax.text(
                 cx, cy, str(int(region)),
                 color="white", fontsize=9, fontweight="bold",
                 ha="center", va="center",
-                bbox=dict(boxstyle="round,pad=0.15", facecolor=MASK_EDGE_COLOR, alpha=0.85, edgecolor="none"),
+                bbox=dict(
+                    boxstyle="round,pad=0.18",
+                    facecolor=(0.08, 0.08, 0.08, 0.82),
+                    edgecolor=MASK_EDGE_COLOR,
+                    linewidth=0.8,
+                ),
             )

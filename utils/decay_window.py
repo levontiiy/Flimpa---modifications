@@ -114,7 +114,7 @@ class DecayCurveWindow(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
-        self.info_label = QLabel("Enable Baseline check in the menu bar, then click on the image.")
+        self.info_label = QLabel("Enable Baseline check in Lifetime maps Settings, then click on the lifetime image.")
         self.info_label.setWordWrap(True)
         self.info_label.setStyleSheet("color: rgb(200, 200, 200); padding: 4px;")
         layout.addWidget(self.info_label)
@@ -129,7 +129,7 @@ class DecayCurveWindow(QMainWindow):
         self.log_check.toggled.connect(self._redraw_last)
         controls.addWidget(self.log_check)
 
-        # FUTURE: decay fit overlays — gated by DECAY_FIT_UI_ENABLED in decay_fitting.py
+        # FUTURE: orange 1-exp fit overlay — gated by DECAY_FIT_UI_ENABLED
         if DECAY_FIT_UI_ENABLED:
             self.show_fit_check = QCheckBox("Show fit (1 exp)")
             self.show_fit_check.setStyleSheet("color: white;")
@@ -140,14 +140,15 @@ class DecayCurveWindow(QMainWindow):
             self.show_fit_check.toggled.connect(self._redraw_last)
             controls.addWidget(self.show_fit_check)
 
-            self.show_map_tau_check = QCheckBox("Show map τ curve")
-            self.show_map_tau_check.setStyleSheet("color: white;")
-            self.show_map_tau_check.setChecked(True)
-            self.show_map_tau_check.setToolTip(
-                "Overlay 1-exp model using τ from the lifetime map (phasor analysis at this pixel)."
-            )
-            self.show_map_tau_check.toggled.connect(self._redraw_last)
-            controls.addWidget(self.show_map_tau_check)
+        self.show_map_tau_check = QCheckBox("Show map τ curve")
+        self.show_map_tau_check.setStyleSheet("color: white;")
+        self.show_map_tau_check.setChecked(True)
+        self.show_map_tau_check.setToolTip(
+            "Overlay a 1-exp model using τ from the lifetime map. "
+            "Use IRF (purple row) chooses reconvolution vs a plain exponential."
+        )
+        self.show_map_tau_check.toggled.connect(self._redraw_last)
+        controls.addWidget(self.show_map_tau_check)
 
         self.align_t0_check = QCheckBox("Start plot at t₀")
         self.align_t0_check.setStyleSheet("color: white;")
@@ -161,7 +162,7 @@ class DecayCurveWindow(QMainWindow):
         controls.addStretch(1)
         layout.addLayout(controls)
 
-        # FUTURE: temporary fit-test controls (IRF, peak-align, map-τ slide)
+        # FUTURE: extra orange-fit test controls stay hidden unless DECAY_FIT_UI_ENABLED
         if DECAY_FIT_UI_ENABLED:
             test_row = QHBoxLayout()
             test_label = QLabel("Test:")
@@ -176,46 +177,48 @@ class DecayCurveWindow(QMainWindow):
             )
             self.peak_align_check.toggled.connect(self._redraw_last)
             test_row.addWidget(self.peak_align_check)
-
-            self.use_irf_check = QCheckBox("Use IRF")
-            self.use_irf_check.setStyleSheet("color: white;")
-            self.use_irf_check.setChecked(True)
-            self.use_irf_check.setToolTip(
-                "Test: off = pure exponential (instant rise at t=0); on = IRF reconvolution if reference loaded."
-            )
-            self.use_irf_check.toggled.connect(self._redraw_last)
-            test_row.addWidget(self.use_irf_check)
-
-            map_shift_label = QLabel("Map τ slide:")
-            map_shift_label.setStyleSheet("color: white;")
-            test_row.addWidget(map_shift_label)
-
-            self.map_shift_slider = QSlider(Qt.Horizontal)
-            self.map_shift_slider.setRange(-500, 500)
-            self.map_shift_slider.setValue(0)
-            self.map_shift_slider.setToolTip("Test: slide purple map-τ curve ±5 ns (display only).")
-            self.map_shift_slider.valueChanged.connect(self._on_map_shift_slider_changed)
-            test_row.addWidget(self.map_shift_slider, stretch=1)
-
-            self.map_shift_spin = QDoubleSpinBox()
-            self.map_shift_spin.setRange(-_MAP_SHIFT_MAX_NS, _MAP_SHIFT_MAX_NS)
-            self.map_shift_spin.setDecimals(2)
-            self.map_shift_spin.setSingleStep(0.05)
-            self.map_shift_spin.setSuffix(" ns")
-            self.map_shift_spin.setKeyboardTracking(False)
-            self.map_shift_spin.setStyleSheet(
-                "color: rgb(180, 140, 255); background: rgb(40, 40, 40); padding: 2px;"
-            )
-            self.map_shift_spin.valueChanged.connect(self._on_map_shift_spin_changed)
-            test_row.addWidget(self.map_shift_spin)
-
-            self.map_shift_reset_btn = QPushButton("Reset")
-            self.map_shift_reset_btn.setToolTip("Reset map curve slide to 0 ns")
-            self.map_shift_reset_btn.clicked.connect(self._reset_map_shift)
-            test_row.addWidget(self.map_shift_reset_btn)
-
             test_row.addStretch(1)
             layout.addLayout(test_row)
+
+        slide_row = QHBoxLayout()
+        self.use_irf_check = QCheckBox("Use IRF")
+        self.use_irf_check.setStyleSheet("color: rgb(180, 140, 255);")
+        self.use_irf_check.setChecked(True)
+        self.use_irf_check.setToolTip(
+            "On: purple curve is IRF ⊗ exponential (needs a reference file).\n"
+            "Off: purple curve is a plain monoexponential."
+        )
+        self.use_irf_check.toggled.connect(self._redraw_last)
+        slide_row.addWidget(self.use_irf_check)
+
+        map_shift_label = QLabel("Move map τ:")
+        map_shift_label.setStyleSheet("color: rgb(180, 140, 255);")
+        slide_row.addWidget(map_shift_label)
+
+        self.map_shift_slider = QSlider(Qt.Horizontal)
+        self.map_shift_slider.setRange(-500, 500)
+        self.map_shift_slider.setValue(0)
+        self.map_shift_slider.setToolTip("Slide the purple map-τ curve ±5 ns (display only).")
+        self.map_shift_slider.valueChanged.connect(self._on_map_shift_slider_changed)
+        slide_row.addWidget(self.map_shift_slider, stretch=1)
+
+        self.map_shift_spin = QDoubleSpinBox()
+        self.map_shift_spin.setRange(-_MAP_SHIFT_MAX_NS, _MAP_SHIFT_MAX_NS)
+        self.map_shift_spin.setDecimals(2)
+        self.map_shift_spin.setSingleStep(0.05)
+        self.map_shift_spin.setSuffix(" ns")
+        self.map_shift_spin.setKeyboardTracking(False)
+        self.map_shift_spin.setStyleSheet(
+            "color: rgb(180, 140, 255); background: rgb(40, 40, 40); padding: 2px;"
+        )
+        self.map_shift_spin.valueChanged.connect(self._on_map_shift_spin_changed)
+        slide_row.addWidget(self.map_shift_spin)
+
+        self.map_shift_reset_btn = QPushButton("Reset")
+        self.map_shift_reset_btn.setToolTip("Reset map curve slide to 0 ns")
+        self.map_shift_reset_btn.clicked.connect(self._reset_map_shift)
+        slide_row.addWidget(self.map_shift_reset_btn)
+        layout.addLayout(slide_row)
 
         self._map_shift_ns = 0.0
 
@@ -234,9 +237,6 @@ class DecayCurveWindow(QMainWindow):
         self._draw_empty_axes()
 
     def _set_map_shift_ns(self, shift_ns: float, *, redraw: bool = True):
-        if not DECAY_FIT_UI_ENABLED:
-            self._map_shift_ns = 0.0
-            return
         shift_ns = float(np.clip(shift_ns, -_MAP_SHIFT_MAX_NS, _MAP_SHIFT_MAX_NS))
         self._map_shift_ns = shift_ns
         slider_val = int(round(shift_ns * _MAP_SHIFT_SLIDER_SCALE))
@@ -424,19 +424,19 @@ class DecayCurveWindow(QMainWindow):
             self.align_t0_check.setChecked(False)
 
         has_map_tau = decay.tau_ns is not None and decay.tau_ns > 0
-        peak_align = False
-        use_irf = True
-        map_shift_ns = 0.0
+        peak_align = self.peak_align_check.isChecked() if DECAY_FIT_UI_ENABLED else True
+        use_irf = self.use_irf_check.isChecked()
+        map_shift_ns = self._map_shift_ns
         self._last_fit = None
 
-        if DECAY_FIT_UI_ENABLED:
-            peak_align = self.peak_align_check.isChecked()
-            use_irf = self.use_irf_check.isChecked()
-            map_shift_ns = self._map_shift_ns
-            self.map_shift_slider.setEnabled(has_map_tau and self.show_map_tau_check.isChecked())
-            self.map_shift_spin.setEnabled(self.map_shift_slider.isEnabled())
-            self.map_shift_reset_btn.setEnabled(self.map_shift_slider.isEnabled())
+        show_map = has_map_tau and self.show_map_tau_check.isChecked()
+        self.show_map_tau_check.setEnabled(has_map_tau)
+        self.use_irf_check.setEnabled(show_map)
+        self.map_shift_slider.setEnabled(show_map)
+        self.map_shift_spin.setEnabled(show_map)
+        self.map_shift_reset_btn.setEnabled(show_map)
 
+        if DECAY_FIT_UI_ENABLED:
             if decay.fit_allowed and t0_ns is not None:
                 self._last_fit = fit_single_exponential(
                     t, y, tau_hint_ns=decay.tau_ns, t0_ns=t0_ns,
@@ -490,18 +490,15 @@ class DecayCurveWindow(QMainWindow):
                 )
 
         map_model = None
-        if DECAY_FIT_UI_ENABLED and has_map_tau:
-            self.show_map_tau_check.setEnabled(True)
+        if has_map_tau:
             map_model = predict_decay_at_tau(
                 t, y, decay.tau_ns,
                 t0_ns=t0_ns,
                 peak_align=peak_align,
                 use_irf=use_irf,
             )
-        elif DECAY_FIT_UI_ENABLED:
-            self.show_map_tau_check.setEnabled(False)
 
-        if DECAY_FIT_UI_ENABLED and map_model is not None and self.show_map_tau_check.isChecked():
+        if map_model is not None and self.show_map_tau_check.isChecked():
             map_model = np.asarray(map_model, dtype=np.float64)
             if abs(map_shift_ns) > 1e-12:
                 map_model = shift_model_on_time_axis(t, map_model, map_shift_ns)
@@ -509,8 +506,9 @@ class DecayCurveWindow(QMainWindow):
                 t, map_model, t0_ns=t0_ns if decay.fit_allowed else None, align_at_t0=align_at_t0,
             )
             map_label = f"Map τ={decay.tau_ns:.2f} ns"
+            map_label += " (IRF)" if use_irf else " (exp)"
             if abs(map_shift_ns) > 1e-12:
-                map_label += f" (Δt={map_shift_ns:+.2f})"
+                map_label += f" Δt={map_shift_ns:+.2f}"
             if use_log:
                 mpos = map_plot > 0
                 ax.semilogy(
@@ -558,6 +556,8 @@ class DecayCurveWindow(QMainWindow):
             parts.append(f"{decay.block_size}×{decay.block_size} block")
         if decay.tau_ns is not None:
             parts.append(f"τ map ≈ {decay.tau_ns:.2f} ns")
+            if self.show_map_tau_check.isChecked():
+                parts.append("IRF reconvolution" if use_irf else "monoexponential")
         if DECAY_FIT_UI_ENABLED and fit is not None:
             parts.append(f"fit τ = {fit.tau_ns:.2f} ns")
             if fit.used_irf:
@@ -568,7 +568,7 @@ class DecayCurveWindow(QMainWindow):
                 parts.append(f"peak Δt = {fit.peak_shift_ns:.2f} ns")
         if DECAY_FIT_UI_ENABLED and peak_align:
             parts.append("peak-align on")
-        if DECAY_FIT_UI_ENABLED and abs(map_shift_ns) > 1e-12:
+        if abs(map_shift_ns) > 1e-12:
             parts.append(f"map slide = {map_shift_ns:+.2f} ns")
         if decay.masked_out:
             parts.append("outside mask or zero signal")

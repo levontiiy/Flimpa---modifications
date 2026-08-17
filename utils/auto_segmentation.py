@@ -5,7 +5,7 @@ Algorithms:
   - otsu_oht (Otsu threshold after morphological top-hat)
   - nth (nonlinear top-hat / local background)
 
-See docs/MASKING_MANUAL.md for parameter definitions and tuning.
+See README.md (Masking) for parameter definitions and tuning.
 
 ---
 FUTURE / NOT IN UI:

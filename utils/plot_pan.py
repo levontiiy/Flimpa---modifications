@@ -2,25 +2,9 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QWidget
 
-_BTN_STYLE = """
-QPushButton {
-    color: white;
-    font-size: 11px;
-    background-color: rgba(45, 45, 45, 210);
-    border: 1px solid rgb(60, 162, 161);
-    border-radius: 4px;
-    padding: 4px 10px;
-}
-QPushButton:hover {
-    background-color: rgb(60, 80, 80);
-}
-QPushButton:checked {
-    background-color: rgb(60, 162, 161);
-}
-"""
+from utils.ui_icons import apply_nav_icon
 
 
 def _image_ax(canvas):
@@ -112,15 +96,8 @@ class PlotPanController:
         self._panning = False
         self._pan_anchor: tuple[float, float, tuple[float, float], tuple[float, float]] | None = None
 
-        self.pan_btn = QPushButton("✋", host)
-        self.pan_btn.setCheckable(True)
-        self.pan_btn.setFixedSize(28, 28)
-        self.pan_btn.setStyleSheet(_BTN_STYLE)
-        self.pan_btn.setToolTip(
-            "Pan mode: drag with left button to move the zoomed view.\n"
-            "You can also right-click drag or two-finger scroll any time."
-        )
-        self.pan_btn.setCursor(Qt.PointingHandCursor)
+        self.pan_btn = QPushButton(host)
+        apply_nav_icon(self.pan_btn, "pan.svg", "Pan", checkable=True)
         self.pan_btn.toggled.connect(self._on_pan_mode_toggled)
 
         self._cids = [

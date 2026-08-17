@@ -7,7 +7,7 @@ Naming conventions:
   {stem}_mask_ROI.tif      — phasor ellipse ROI
   {stem} segmentation.tif  — legacy name with a space (still recognised on import)
 
-See docs/MASKING_MANUAL.md for import/export workflow.
+See README.md (Masking) for import/export workflow.
 """
 
 from pathlib import Path

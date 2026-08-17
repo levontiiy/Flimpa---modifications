@@ -1,7 +1,7 @@
 import os
 from PySide6.QtWidgets import (QStatusBar, QMenuBar, QFileDialog, QInputDialog, QFileDialog, QLineEdit, QLabel,QPushButton,
                                QProgressDialog, QApplication, QMessageBox, QComboBox, QVBoxLayout, QDialogButtonBox, QDialog,
-                               QRadioButton, QButtonGroup, QHBoxLayout, QWidget, QToolBar, QToolButton)
+                               QRadioButton, QButtonGroup, QHBoxLayout, QWidget)
 from PySide6.QtGui import QDoubleValidator
 
 from PySide6.QtCore import Qt, QTimer
@@ -103,55 +103,11 @@ class ToolBarComponents:
         export_cv = file_menu.addAction("Export lifetime values table")
         export_cv.triggered.connect(self.save_csv)
 
-        # Colormap + Baseline check on a real toolbar (visible on macOS; QMenuBar widgets are not)
-        self.setup_analysis_toolbar()
+        # Colormap widgets (Intensity display Settings) and Baseline check (Lifetime maps Settings)
+        self.setup_analysis_controls()
 
-    def setup_analysis_toolbar(self):
-        """Compact row under the menu: Colormap picker and Baseline check."""
-        toolbar = QToolBar("Analysis tools", self.main_window)
-        toolbar.setObjectName("analysisToolbar")
-        toolbar.setMovable(False)
-        toolbar.setFloatable(False)
-        toolbar.setIconSize(toolbar.iconSize())
-        toolbar.setStyleSheet("""
-            QToolBar#analysisToolbar {
-                background-color: rgb(40, 40, 40);
-                border: none;
-                border-bottom: 1px solid rgb(55, 55, 55);
-                spacing: 8px;
-                padding: 4px 10px;
-            }
-            QToolBar#analysisToolbar QLabel {
-                color: white;
-                padding-right: 2px;
-            }
-            QToolBar#analysisToolbar QComboBox {
-                background-color: rgb(63, 63, 63);
-                color: white;
-                padding: 2px 6px;
-                min-height: 22px;
-            }
-            QToolBar#analysisToolbar QPushButton,
-            QToolBar#analysisToolbar QToolButton {
-                color: white;
-                background-color: rgb(55, 55, 55);
-                border: 1px solid rgb(70, 70, 70);
-                border-radius: 3px;
-                padding: 4px 10px;
-            }
-            QToolBar#analysisToolbar QPushButton:hover,
-            QToolBar#analysisToolbar QToolButton:hover {
-                background-color: rgb(70, 70, 70);
-            }
-            QToolBar#analysisToolbar QToolButton:checked {
-                background-color: rgb(60, 162, 161);
-                border-color: rgb(60, 162, 161);
-            }
-        """)
-
-        cmap_label = QLabel("Colormap")
-        toolbar.addWidget(cmap_label)
-
+    def setup_analysis_controls(self):
+        """Create colormap widgets and Baseline check (placed in tab Settings, not a toolbar)."""
         self.cmap_combo = QComboBox()
         self.cmap_combo.addItems(LIFETIME_CMAP_PRESETS + ["Custom"])
         self.cmap_combo.setFixedWidth(150)
@@ -159,27 +115,54 @@ class ToolBarComponents:
         self.cmap_combo.setCurrentText(self.shared_info.config.get("lifetime_cmap", "Rainbow"))
         self.cmap_combo.setToolTip("Lifetime / phasor colour scale")
         self.cmap_combo.currentIndexChanged.connect(self._on_colormap_preset_changed)
-        toolbar.addWidget(self.cmap_combo)
+        self.cmap_combo.setStyleSheet("""
+            QComboBox {
+                background-color: rgb(63, 63, 63);
+                color: white;
+                padding: 2px 6px;
+                min-height: 22px;
+            }
+        """)
 
-        load_btn = QPushButton("Load custom...")
-        load_btn.setToolTip("Load a custom colormap from CSV/TXT or an image strip.")
-        load_btn.clicked.connect(self._on_load_custom_colormap)
-        toolbar.addWidget(load_btn)
+        self.load_custom_cmap_btn = QPushButton("Load custom...")
+        self.load_custom_cmap_btn.setToolTip("Load a custom colormap from CSV/TXT or an image strip.")
+        self.load_custom_cmap_btn.clicked.connect(self._on_load_custom_colormap)
+        self.load_custom_cmap_btn.setStyleSheet("""
+            QPushButton {
+                color: white;
+                background-color: rgb(55, 55, 55);
+                border: 1px solid rgb(70, 70, 70);
+                border-radius: 3px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: rgb(70, 70, 70);
+            }
+        """)
 
-        toolbar.addSeparator()
-
-        self.baseline_check_action = QToolButton()
-        self.baseline_check_action.setText("Baseline check")
+        self.baseline_check_action = QPushButton("Baseline check")
         self.baseline_check_action.setCheckable(True)
         self.baseline_check_action.setToolTip(
-            "Click pixels on Intensity display or Lifetime maps to inspect decay curves "
+            "Click pixels on Lifetime maps to inspect decay curves "
             "(uses Pixel block size)."
         )
         self.baseline_check_action.toggled.connect(self._on_baseline_check_toggled)
-        toolbar.addWidget(self.baseline_check_action)
-
-        self.main_window.addToolBar(Qt.TopToolBarArea, toolbar)
-        self.analysis_toolbar = toolbar
+        self.baseline_check_action.setStyleSheet("""
+            QPushButton {
+                color: white;
+                background-color: rgb(55, 55, 55);
+                border: 1px solid rgb(70, 70, 70);
+                border-radius: 3px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: rgb(70, 70, 70);
+            }
+            QPushButton:checked {
+                background-color: rgb(60, 162, 161);
+                border-color: rgb(60, 162, 161);
+            }
+        """)
 
     def _on_colormap_preset_changed(self):
         name = self.cmap_combo.currentText()
@@ -246,7 +229,7 @@ class ToolBarComponents:
             editor.deactivate()
 
     def sync_baseline_check_ui(self):
-        """Keep the toolbar Baseline check button in sync with the mask editor tool."""
+        """Keep the Baseline check button in sync with the mask editor tool."""
         editor = getattr(self.main_window, "mask_editor", None)
         if editor is None or not hasattr(self, "baseline_check_action"):
             return
@@ -396,7 +379,7 @@ class ToolBarComponents:
 
 
     def _pick_mask_source(self):
-        """After raw import: ask folder vs individual mask TIFFs (see docs/MASKING_MANUAL.md)."""
+        """After raw import: ask folder vs individual mask TIFFs (see README.md, Masking)."""
         dialog = MaskImportSourceDialog(self.main_window)
         if dialog.exec() != QDialog.Accepted:
             return None

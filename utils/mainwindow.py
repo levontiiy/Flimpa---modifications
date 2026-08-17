@@ -150,8 +150,11 @@ class MainWindow(QMainWindow):
             gallery_widget = QWidget()
             gallery_widget.setStyleSheet("QWidget { background-color: rgb(18, 18, 18); }")
             self.gallery_layout_V = QVBoxLayout()
+            self.gallery_layout_V.setContentsMargins(8, 8, 8, 0)
+            self.gallery_layout_V.setSpacing(6)
             self.scroll_area = QScrollArea()  # Initialize scroll area
             self.scroll_area.setWidgetResizable(True)  # Allow content resizing within scroll area
+            self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
             self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -161,8 +164,8 @@ class MainWindow(QMainWindow):
             self.gallery_layout_grid.setAlignment(Qt.AlignCenter)  # Center the grid layout
             self.scroll_area.setWidget(self.gallery_container)
 
-            self.gallery_layout_V.addWidget(self.scroll_area)
-            self.gallery_layout_V.addLayout(self.tab_settings.input_layout(box_type='gallery_box'))
+            self.gallery_layout_V.addWidget(self.scroll_area, 1)
+            self.gallery_layout_V.addLayout(self.tab_settings.input_layout(box_type='gallery_box'), 0)
 
             gallery_widget.setLayout(self.gallery_layout_V)
             self.ui_layout.tabs_widget.addTab(gallery_widget, "Gallery (tau)")
@@ -171,8 +174,11 @@ class MainWindow(QMainWindow):
             gallery_widget_I = QWidget()
             gallery_widget_I.setStyleSheet("QWidget { background-color: rgb(18, 18, 18); }")
             self.gallery_layout_V_I = QVBoxLayout()
+            self.gallery_layout_V_I.setContentsMargins(8, 8, 8, 0)
+            self.gallery_layout_V_I.setSpacing(6)
             self.scroll_area_I = QScrollArea()  # Initialize scroll area
             self.scroll_area_I.setWidgetResizable(True)  # Allow content resizing within scroll area
+            self.scroll_area_I.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
             self.scroll_area_I.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
             self.scroll_area_I.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -181,8 +187,8 @@ class MainWindow(QMainWindow):
             self.gallery_layout_grid_I = QGridLayout(self.gallery_container_I)
             self.scroll_area_I.setWidget(self.gallery_container_I)
 
-            self.gallery_layout_V_I.addWidget(self.scroll_area_I)
-            self.gallery_layout_V_I.addLayout(self.tab_settings.input_layout(box_type='input_box'))
+            self.gallery_layout_V_I.addWidget(self.scroll_area_I, 1)
+            self.gallery_layout_V_I.addLayout(self.tab_settings.input_layout(box_type='input_box'), 0)
 
             gallery_widget_I.setLayout(self.gallery_layout_V_I)
             self.ui_layout.tabs_widget.addTab(gallery_widget_I, "Gallery (I)")
@@ -191,11 +197,15 @@ class MainWindow(QMainWindow):
             violin_plot_tab = QWidget()
             violin_plot_tab.setStyleSheet("QWidget { background-color: rgb(18, 18, 18); }")
             self.violin_plot_layout = QVBoxLayout()
+            self.violin_plot_layout.setContentsMargins(8, 8, 8, 0)
+            self.violin_plot_layout.setSpacing(6)
 
             self.toolbar_violin = NavigationToolbar_violin(self.canvas_violin, self)
-            self.violin_plot_layout.addWidget(self.toolbar_violin)
-            self.violin_plot_layout.addWidget(self.canvas_violin)
-            self.violin_plot_layout.addLayout(self.tab_settings.input_layout(box_type='violin_box'))
+            self.toolbar_violin.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+            self.canvas_violin.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self.violin_plot_layout.addWidget(self.toolbar_violin, 0)
+            self.violin_plot_layout.addWidget(self.canvas_violin, 1)
+            self.violin_plot_layout.addLayout(self.tab_settings.input_layout(box_type='violin_box'), 0)
 
             violin_plot_tab.setLayout(self.violin_plot_layout)
             self.ui_layout.tabs_widget.addTab(violin_plot_tab, "Violin plots")

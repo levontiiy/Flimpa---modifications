@@ -4,7 +4,7 @@ Manual region drawing on the intensity / lifetime image.
 Tools: polygon, rectangle, lasso, brush, auto-segmentation (via run_auto_segmentation).
 Labelled uint16 mask: 0 = background, 1..N = regions.
 
-See docs/MASKING_MANUAL.md for user-facing documentation.
+See README.md (Masking) for user-facing documentation.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from matplotlib.patches import Circle
 from matplotlib.widgets import LassoSelector, PolygonSelector, RectangleSelector
 
 from utils.mask_io import apply_mask_to_sample, save_mask_tif
-from utils.mask_viz import SELECT_COLOR, SELECT_FILL, MASK_FILL_CMAP, fit_region_to_shape
+from utils.mask_viz import SELECT_COLOR, SELECT_FILL, MASK_FILL_CMAP, MASK_FILL_ALPHA, fit_region_to_shape
 from utils.shared_data import SharedData
 
 
@@ -198,7 +198,7 @@ class ManualMaskEditor:
         self._brush_preview_im = self._ax.imshow(
             empty,
             cmap=colormaps[MASK_FILL_CMAP],
-            alpha=0.55,
+            alpha=MASK_FILL_ALPHA,
             vmin=0,
             vmax=1,
             interpolation="nearest",
