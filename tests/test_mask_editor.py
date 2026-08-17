@@ -47,6 +47,91 @@ def test_brush_cursor_radius_matches_width():
     plt.close(fig)
 
 
+def test_clear_mask_stops_drawing_tool():
+    """Clear mask exits polygon/brush (not inspect) and zeros the mask."""
+    from utils.shared_data import SharedData
+
+    shared = SharedData()
+    shared.raw_data_dict.clear()
+    shared.results_dict.clear()
+    data = np.zeros((4, 5, 5), dtype=np.float32)
+    shared.raw_data_dict["f"] = {
+        "data": data,
+        "t_series": np.arange(4),
+        "masked_data": np.ones_like(data),
+        "mask_arr": np.ones((5, 5), dtype=np.uint16),
+        "condition": "t",
+    }
+    shared.config["selected_file"] = "f"
+
+    class _PlotImages:
+        def plot_img(self, preserve_mask_tool=False):
+            pass
+
+        def plot_tau_map(self, preserve_mask_tool=False):
+            pass
+
+    class _Main:
+        def __init__(self):
+            self.plotImages = _PlotImages()
+            self.canvas_tau = type("C", (), {"draw_idle": lambda self: None})()
+            self.toolbar_components = None
+
+    editor = ManualMaskEditor(_Main())
+    editor.mask = np.ones((5, 5), dtype=np.uint16)
+    editor.n_regions = 1
+    editor._tool = "poly"
+    editor.antimask_mode = True
+    editor._selector = object()
+
+    editor.clear_mask()
+
+    assert editor._tool is None
+    assert editor._selector is None
+    assert editor.antimask_mode is False
+    assert editor.n_regions == 0
+    assert np.all(editor.mask == 0)
+    assert shared.raw_data_dict["f"]["mask_arr"] is None
+    assert shared.raw_data_dict["f"]["masked_data"] is None
+
+
+def test_clear_mask_leaves_inspect_tool():
+    from utils.shared_data import SharedData
+
+    shared = SharedData()
+    shared.raw_data_dict.clear()
+    shared.results_dict.clear()
+    shared.raw_data_dict["f"] = {
+        "data": np.zeros((2, 3, 3), dtype=np.float32),
+        "t_series": np.arange(2),
+        "masked_data": None,
+        "mask_arr": None,
+        "condition": "t",
+    }
+    shared.config["selected_file"] = "f"
+
+    class _PlotImages:
+        def plot_img(self, preserve_mask_tool=False):
+            pass
+
+        def plot_tau_map(self, preserve_mask_tool=False):
+            pass
+
+    class _Main:
+        def __init__(self):
+            self.plotImages = _PlotImages()
+            self.canvas_tau = type("C", (), {"draw_idle": lambda self: None})()
+            self.toolbar_components = None
+
+    editor = ManualMaskEditor(_Main())
+    editor.mask = np.ones((3, 3), dtype=np.uint16)
+    editor._tool = "inspect"
+
+    editor.clear_mask()
+
+    assert editor._tool == "inspect"
+
+
 def test_disk_indices_match_brush_radius():
     shape = (20, 20)
     yy, xx = _disk_indices(10.0, 10.0, radius=3, shape=shape)

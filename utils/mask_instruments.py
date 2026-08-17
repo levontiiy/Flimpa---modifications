@@ -209,7 +209,7 @@ class MaskInstrumentsOverlay:
             "Brush": "Paint regions; start on existing region to extend it.",
             "Auto segment": "Intensity auto-segmentation, then refine manually.",
             "Erase": "Edit mask: Polygon / Rectangle / Lasso / Brush remove parts (set pixels to 0).",
-            "Clear mask": "Remove all regions for this file.",
+            "Clear mask": "Remove all regions for this file and stop the masking tool.",
         }
         for label, tool in [
             ("Polygon", "poly"),
@@ -308,10 +308,12 @@ class MaskInstrumentsOverlay:
         self._update_btn_label()
 
     def _clear_mask(self):
-        self._close_popup()
         self.editor.clear_mask()
+        self.antimask_btn.blockSignals(True)
         self.antimask_btn.setChecked(False)
+        self.antimask_btn.blockSignals(False)
         self._update_btn_label()
+        self._close_popup()
 
 
 class PlotWithMaskInstruments(QWidget):

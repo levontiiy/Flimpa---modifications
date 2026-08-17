@@ -292,7 +292,15 @@ class ManualMaskEditor:
     def erase_mode(self) -> bool:
         return self.antimask_mode
 
+    def _exit_drawing_tool(self):
+        """Stop polygon / rectangle / lasso / brush. Leave Baseline check (inspect) on."""
+        if self._tool is not None and self._tool != "inspect":
+            self.deactivate()
+        self.antimask_mode = False
+
     def clear_mask(self):
+        # Disconnect selectors while the current axes still exist, then drop the mask.
+        self._exit_drawing_tool()
         shape = self._image_shape()
         if shape is None:
             return
@@ -302,9 +310,10 @@ class ManualMaskEditor:
         if filename and filename in self.shared_info.raw_data_dict:
             self.shared_info.raw_data_dict[filename]["mask_arr"] = None
             self.shared_info.raw_data_dict[filename]["masked_data"] = None
-        self.main_window.plotImages.plot_img()
+        keep_inspect = self._tool == "inspect"
+        self.main_window.plotImages.plot_img(preserve_mask_tool=keep_inspect)
         if self.shared_info.results_dict and filename in self.shared_info.results_dict:
-            self.main_window.plotImages.plot_tau_map()
+            self.main_window.plotImages.plot_tau_map(preserve_mask_tool=keep_inspect)
             self.main_window.canvas_tau.draw_idle()
 
     def _apply_region(self, region_bool):

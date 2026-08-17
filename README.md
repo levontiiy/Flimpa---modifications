@@ -6,7 +6,7 @@
 
 **FLIMPA** is an open-source app for phasor-plot analysis of raw Time-Correlated Single Photon Counting (TCSPC) Fluorescence Lifetime Imaging Microscopy (FLIM) data.
 
-This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It adds masking, FRET maps, baseline-check decay curves, and related UI. Run it from source (not from the original Windows `.exe`, which does not include these extras).
+This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It adds in-app masking, FRET maps, baseline-check decay curves, colormaps, and related UI. Run it from source (the original Windows `.exe` does not include these extras).
 
 > **FLIMPA: A Versatile Software for Fluorescence Lifetime Imaging Microscopy Phasor Analysis**, published in *Analytical Chemistry*  
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
@@ -22,13 +22,13 @@ This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaK
 
 - Phasor plot generation and analysis
 - Fluorescence lifetime and intensity map visualisation
-- ROI selection on the phasor plot
+- ROI selection on the phasor plot (ellipse), saved as a mask if you want it in analysis
 - Gallery plots of fluorescence lifetime and intensity maps
 - Violin plot analysis
 - Table of mean fluorescence lifetime values per image
-- Manual masking (polygon, rectangle, lasso, brush) and mask import/export
+- Manual masking on intensity / lifetime images (polygon, rectangle, lasso, brush) and mask import/export
 - FRET efficiency maps (`E = 1 − τ / τ_D`)
-- Baseline check: click a pixel to inspect the decay curve
+- Baseline check: click a pixel on the lifetime map to inspect the decay curve
 - Lifetime colormap presets and custom colormap loading
 
 ---
@@ -118,7 +118,13 @@ If `git` is not installed, download the repository ZIP instead.
 
 For the original FLIMPA workflow, also see the online manuals ([PowerPoint](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing) and [PDF](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)).
 
-![intro_v1 4](https://github.com/user-attachments/assets/81cd375b-d5af-4eec-931f-b3ca2f0ef38e)
+The layout is: parameters and **Run Phasor Plot Analysis** on the left, the phasor plot under that, image tabs in the centre, and the file list on the right. After analysis, extra tabs appear for lifetime maps, galleries, violin plots, and the lifetime table.
+
+Menus: **Load data**, **Reference**, **Masking**, **Save**.
+
+*Video: general features — overview of the app after data are loaded*
+
+![General features](assets/general_features.mp4)
 
 ## Importing data
 
@@ -132,75 +138,118 @@ For best results, use spatial sizes up to 512 × 512. Files larger than about 10
 
 For `.ptu` files, see slides 5–6 of the [online user manual](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing).
 
-Sample `.sdt` files are in `sample_data/` (COS-7 cells, SiR-tubulin, Nocodazole-treated and controls from the publication).
+Sample `.sdt` files are in `sample_data/` (COS-7 cells, SiR-tubulin, Nocodazole-treated and controls from the publication). Example masks are in `sample_data/masks_example/` and `sample_data/Masks_created/`.
 
-Import options (menu **Load data**):
+**Load data** menu:
 
-- Import raw data
-- Import raw data and assign experimental conditions (e.g. treated vs untreated)
-- Import raw data with manually created masks (draw in FLIMPA or import mask TIFFs — see [Masking](#masking))
+- **Import raw data**
+- **Import raw data by condition** (e.g. treated vs untreated)
+- **Import raw data with manual masks**
+- **Import raw data by condition with manual masks**
 
-*Example: importing raw data and assigning experimental conditions*
+**Reference** menu:
 
-![condition_assignment_v1 4](https://github.com/user-attachments/assets/b7576e13-c74f-40dd-b6f4-d93d88231342)
+- **Import reference file** — calibration sample with known lifetime
+- **Import IRF** — optional instrument response for the purple overlay in Baseline check
 
 FLIMPA currently accepts single files, not time-lapse series.
 
+*Video: upload files — importing samples (and conditions if you use them)*
+
+![Upload files](assets/upload_files.mp4)
+
 ## Running phasor plot analysis
 
-Set these parameters, then click **Run Phasor Plot Analysis**:
+Set these parameters (left panel), then click **Run Phasor Plot Analysis**:
 
-- `Laser Frequency` (MHz)
-- Upload a `Reference File`
-- `Reference File Lifetime` (ns)
-- `Pixel block size` (default 3×3) — spatial averaging of neighbouring pixels before phasor calculation (not the decay time axis)
-- `Minimum Photon Count Threshold` (optional; at least 100 photons per pixel is recommended)
-- `Maximum Photon Count Threshold` (optional)
-- `Baseline correction` (`True` removes constant DC noise from the decay, which helps the Fourier transform)
-- `% time channels (baseline corr.)` (default 3.5%) — fraction of the **earliest delay-time channels** used for baseline correction, not spatial pixel grouping
+| Control | What it does |
+|---------|----------------|
+| **Frequency (MHz)** | Laser repetition rate |
+| **Reference file** | Calibration file imported under **Reference** |
+| **Reference lifetime (ns)** | Known lifetime of that reference (also donor `τ_D` for FRET; default 4 ns for Rhodamine 6G) |
+| **Pixel block size** | Spatial averaging of neighbouring pixels before phasor calculation (`3×3` default, or `7×7` / `9×9` / `12×12` / `None`). Not the decay time axis |
+| **Min. photon counts** / **Max. photon counts** | Pixels outside this intensity range are excluded (teal overlay on **Intensity display**) |
+| **Baseline correction** | `True` subtracts a constant offset estimated from the earliest delay channels |
+| **% time channels (baseline corr.)** | Fraction of those earliest channels used for the offset (default 3.5%) |
 
 **Warning:** if real fluorescence is already present in the earliest time channels (for example after heavy `.ptu` time binning), baseline correction will subtract signal as well as noise. See slide 11 of the [online user manual](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing).
 
-*Example: importing a reference file, setting a photon threshold, and running analysis*
+## Phasor plot
 
-![reference_upload_v1 4](https://github.com/user-attachments/assets/205d32d9-488d-4cbb-94b9-ccad854419be)
+You can show one image or several samples together.
 
-## Phasor plot visualisation
+- **τ Labels** — lifetime ticks on the universal circle
+- **ROI** — draw an ellipse on the phasor; non-selected pixels are dimmed on the lifetime map (display only until you save the ROI mask)
+- **Individual** / **Condition** — one file vs grouped by experimental condition (gallery)
+- **Scatter** / **Histogram** / **Contour** — how points are drawn
 
-You can plot one image or several samples together, as `scatter`, `histogram`, or `contour`.
+On **Gallery (tau)**, the **Layers** list (right of the phasor) shows/hides files and sets draw order (▲ / ▼).
 
-![plot_options_v1 4](https://github.com/user-attachments/assets/b51e1d2f-f068-4ec5-bab9-1d6389661ea6)
+## Intensity display
 
-## Intensity display and colormap
+Always available. Settings at the bottom of the tab:
 
-On **Intensity display**, Settings at the bottom of the tab:
+- **Colormap** — lifetime / phasor colour scale (Rainbow, Viridis, Plasma, …, or Custom)
+- **Load custom...** — CSV/TXT (R,G,B rows, low → high lifetime) or a horizontal colour-strip image
 
-- **Colormap** — lifetime / phasor colour scale (Rainbow, Viridis, …, or Custom)
-- **Load custom...** — CSV/TXT (R,G,B rows) or a horizontal colour-strip image
+On intensity, lifetime, and FRET images: **Masking ▾** is top-left; pan / reset / zoom are top-right.
 
-Image navigation on intensity / lifetime / FRET plots: pan, reset, zoom in, zoom out (top-right of the image). **Masking ▾** is top-left.
+## Lifetime maps
 
-## Lifetime maps and baseline check
+After analysis, **Lifetime maps** Settings:
 
-After analysis, **Lifetime maps** Settings include min/max lifetime, which map (average / M / phi), integrate intensity, and:
+- **Min. / Max. lifetime (ns)** — colour scale
+- **Lifetime map** — `average`, `M` (modulation), or `phi` (phase)
+- **Integrate intensity** — grayscale intensity overlay on the colour map
+- **Baseline check** — click a pixel to open the decay-curve window (see below)
 
-- **Baseline check** — click a pixel on the lifetime image to inspect the decay curve (uses **Pixel block size**)
+## Baseline check (decay curve)
+
+1. Open **Lifetime maps**.
+2. In that tab’s Settings, turn on **Baseline check**.
+3. Click a pixel on the lifetime image.
+
+The **FLIMPA — Baseline check** window shows photon counts vs delay time for that location. It uses **Pixel block size** (the same N×N neighbourhood as analysis).
+
+In the window:
+
+- **Log scale (Y)**
+- **Show map τ curve** — purple 1-exp model using τ from the lifetime map
+- **Start plot at t₀** — if baseline correction is on, hide the empty pre-t₀ region
+- **Use IRF** — purple curve is IRF ⊗ exponential when a reference is loaded; off = plain exponential
+- **Move map τ** — slide the purple curve for display only (±5 ns)
+
+*Video: decay curve — Baseline check on a lifetime-map pixel*
+
+![Decay curve](assets/decay_curve.mp4)
 
 ## FRET
 
-After analysis, the **FRET** tab shows `E = 1 − τ / τ_D`. Set donor lifetime `τ_D` (default 4 ns) and the display range in that tab’s Settings.
+The **FRET** tab shows `E = 1 − τ / τ_D`. Settings:
+
+- **Donor τ_D (ns)** — same value as **Reference lifetime**
+- **Lifetime map** — which τ map is used
+- **Min. / Max. display range** — colour scale for *E* (default 0–1)
+
+## Gallery, violin plots, and the lifetime table
+
+After analysis:
+
+- **Gallery (tau)** / **Gallery (I)** — one thumbnail per file; lifetime gallery uses the same min/max, map type, and integrate-intensity settings
+- **Violin plots** — distribution of lifetimes; choose `average` / `M` / `phi`
+- **Lifetime values** — mean lifetime per image; **Group by** None, Condition, or Sample
 
 ## Saving data
 
 **Save** menu:
 
-- **Lifetime and intensity maps** — `.png` and raw `.tif`
-- **Gallery visualisations** — lifetime and intensity galleries as `.png`
-- **Phasor plots and violin plots** — transparent background
-- **Statistical data** — `.csv` of mean fluorescence lifetime per image
-- **Manual / ROI masks** — uint16 TIFF via the **Masking** menu (see below)
+- **Save lifetime maps** — `.png` and raw `.tif`
+- **Save lifetime gallery**
+- **Save intensity images** / **Save intensity gallery**
+- **Save transparent phasor plot** / **Save transparent violin plot**
+- **Export lifetime values table** — `.csv`
 
-<img width="1644" height="951" alt="save_data-42" src="https://github.com/user-attachments/assets/17e8f17e-5780-4461-9d7c-c76dc6100ff9" />
+Masks are saved from the **Masking** menu, not **Save**.
 
 ---
 
@@ -216,28 +265,20 @@ Three ways to restrict which pixels enter phasor / lifetime analysis:
 
 Manual masks are **labelled uint16 TIFF**: `0` = outside, `1`, `2`, `3`… = separate regions.
 
-When a mask is active:
-
-```text
-masked_data = raw_data where mask > 0, else 0
-```
-
-Pixels outside the mask do not contribute to phasor coordinates or lifetime maps.
-
-**Phasor ROI** (ellipse) only dims the lifetime-map preview until you use **Masking → Save ROI mask**.
+When a mask is active, pixels with label `0` are set to zero in the analysis cube. They do not contribute to phasor coordinates or lifetime maps.
 
 Photon min/max thresholds are applied separately and shown as a teal overlay on intensity.
 
-## Drawing tools
+## Manual mask (polygon and other drawing tools)
 
 On **Intensity display** and **Lifetime maps**, **Masking ▾** is at the top-left of the image.
 
 1. Click **Masking ▾**.
-2. Choose a tool (polygon, rectangle, lasso, brush).
-3. The menu closes (**Back** leaves without choosing a tool).
-4. Click **Masking ▾** again to reopen.
+2. Choose **Polygon**, **Rectangle**, **Lasso**, or **Brush**.
+3. Draw on the image. **Back** closes the menu without choosing a tool.
+4. **Clear mask** removes all regions for this file **and** stops the drawing tool.
 
-When **Erase** is on, the button reads **Masking · Erase ▾**.
+When **Erase** is on, the button reads **Masking · Erase ▾**. Drawing then sets pixels to `0` instead of adding a region.
 
 | Tool | Use |
 |------|-----|
@@ -245,14 +286,27 @@ When **Erase** is on, the button reads **Masking · Erase ▾**.
 | **Rectangle** | Drag a box |
 | **Lasso** | Freehand outline |
 | **Brush** | Paint with a circular brush; set **Brush size (px)** in the menu (1–30) |
-| **Erase** | Toggle: Polygon / Rectangle / Lasso / Brush **remove** mask inside the drawn area |
-| **Clear mask** | Remove all regions for the selected file |
+| **Erase** | Toggle: tools **remove** mask inside the drawn area |
+| **Clear mask** | Remove all regions and exit masking |
 
 **Brush:** a stroke on empty background creates a **new** region label. Starting on an existing region **extends that label**. The mask updates when you release the mouse.
 
-**Erase:** turn on **Erase**, then draw. Pixels inside the area are set to `0`. Other labels stay; the region count updates after each edit.
+Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Plot Analysis**.
 
-Typical workflow: **draw mask → save → Run Phasor Plot Analysis**.
+*Video: polygon masking — drawing a manual mask on the image*
+
+![Polygon masking](assets/polygon_masking.mp4)
+
+## Phasor ROI mask
+
+1. After analysis, click **ROI** above the phasor plot.
+2. Drag an ellipse around the phasor cloud you want to keep. The lifetime map dims pixels outside that ellipse (preview only).
+3. **Masking → Save ROI mask (from phasor)...** writes `{stem}_mask_ROI.tif` and applies it to analysis.
+4. Toggle **ROI** again to clear the ellipse preview.
+
+*Video: ROI masking — ellipse on the phasor plot, then save*
+
+![ROI masking](assets/roi_masking.mp4)
 
 ## Saving and clearing masks
 
@@ -262,7 +316,7 @@ Typical workflow: **draw mask → save → Run Phasor Plot Analysis**.
 |--------|--------|
 | **Save manual mask (polygon)...** | Suggested `{stem}_mask_polygon.tif` |
 | **Save ROI mask (from phasor)...** | Suggested `{stem}_mask_ROI.tif` |
-| **Clear manual mask for selected file** | Clears in memory only (does not delete files on disk) |
+| **Clear manual mask for selected file** | Clears in memory only (does not delete files on disk) and exits the drawing tool |
 
 ## Importing masks
 
@@ -280,58 +334,6 @@ Recognised names for sample `{stem}`:
 - `{stem} segmentation.tif` (legacy name with a space; still imported)
 
 A custom name works when importing a **single** mask with a **single** raw file, or if the filename starts with `{stem}_`.
-
-## Auto-segmentation (not shown in the UI)
-
-Auto-segmentation is implemented but hidden. To show **Masking → Auto segment**, set `AUTO_SEGMENT_UI_ENABLED = True` in `utils/auto_segmentation.py`.
-
-It runs on the **integrated intensity image** (sum over time) of the selected file, then replaces the current mask. You can refine with **Brush** and **Erase**.
-
-Algorithms: **Otsu + top-hat** and **nonlinear top-hat (nth)**.
-
-Shared pipeline:
-
-1. Pre-process intensity (algorithm-specific).
-2. Threshold to binary foreground.
-3. Morphological smoothing: erode then dilate with a disk of radius `smoothing`.
-4. Connected-component labelling (8-neighbour).
-5. Drop regions smaller than `min_size` pixels².
-6. Re-label survivors as `1`, `2`, `3`, …
-
-### Otsu + top-hat
-
-Best for a relatively uniform background with bright objects.
-
-`J = intensity + white_tophat − black_tophat`, then Otsu on `J`. Cutoff: `threshold = otsu_level / sensitivity`.
-
-| Parameter | Default | Meaning |
-|-----------|---------|---------|
-| **scale** | 100 | Approximate object width in pixels (typical cell diameter). Too small → noisy; too large → misses detail. |
-| **sensitivity** | 1.0 | Divides the Otsu level. Higher → more pixels included. Try 0.8–2.0. |
-| **smoothing** | 5 | Disk radius (px) after binarisation. Increase if the mask is fragmented. |
-| **min_size** | 200 | Minimum region area (px²). Increase to ignore debris. |
-
-### Nonlinear top-hat (nth)
-
-Best for uneven background or dim structures.
-
-| Parameter | Default | Meaning |
-|-----------|---------|---------|
-| **scale** | 100 | Object width (px) for the inner local-mean window. |
-| **rel_bg_scale** | 2.0 | Background window / object window (≥ 1). Larger → stronger background suppression. |
-| **threshold** | 0.1 | Cut-off on the normalised nth image (0–1). Lower → more foreground. |
-| **smoothing** | 5 | Same as Otsu. |
-| **min_size** | 200 | Same as Otsu. |
-
-Tuning:
-
-| Problem | Try |
-|---------|-----|
-| No regions found | Lower **threshold** (nth) or raise **sensitivity** (Otsu); lower **min_size**; smaller **scale** |
-| Mask covers the whole field | Raise **threshold** / lower **sensitivity**; raise **min_size** |
-| Jagged or holey regions | Increase **smoothing** |
-| Small debris labelled | Increase **min_size** |
-| Large cells split into many labels | Increase **smoothing**, or merge with the brush (same label) |
 
 ---
 
