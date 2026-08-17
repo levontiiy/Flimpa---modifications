@@ -91,12 +91,13 @@ class TabSettingsWidgets():
             self.main_window.plotImages.plot_fret_map()
 
     def _refresh_lifetime_visuals(self, plot_type, param_id):
-        if param_id not in ("lifetime_vmin", "lifetime_vmax", "lifetime_map"):
+        if param_id not in ("lifetime_vmin", "lifetime_vmax", "lifetime_map", "lifetime_itegrate"):
             return
 
         if plot_type == "tau_map":
             self.main_window.plotImages.plot_tau_map()
-            self.main_window.phasor_componets.plot_phasor_coordinates()
+            if param_id != "lifetime_itegrate":
+                self.main_window.phasor_componets.plot_phasor_coordinates()
         elif plot_type == "gallery":
             self.main_window.plotImages.gallery_imgs(data_dict=self.shared_info.results_dict)
             if getattr(self.main_window.phasor_componets, "_is_gallery_active", lambda: False)():
@@ -173,6 +174,7 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Min. lifetime (ns)", param_id="lifetime_vmin", plot_type = "tau_map"), 0, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "tau_map"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "tau_map"), 1, 0)
+        grid_parameters.addLayout(self.input_parameters(param_name="Integrate intensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "tau_map"), 1, 1)
         return grid_parameters
     
     def fret_box(self):
@@ -226,6 +228,7 @@ class TabSettingsWidgets():
         grid_parameters.addLayout(self.input_parameters(param_name="Min. lifetime (ns)", param_id="lifetime_vmin", plot_type = "gallery"), 0, 0)
         grid_parameters.addLayout(self.input_parameters(param_name="Max. lifetime (ns)", param_id="lifetime_vmax", plot_type = "gallery"), 0, 1)
         grid_parameters.addLayout(self.input_parameters(param_name="Lifetime map", input_type="combobox", items=["average", "M", "phi"], param_id="lifetime_map", plot_type = "gallery"), 1, 0)
+        grid_parameters.addLayout(self.input_parameters(param_name="Integrate intensity", input_type="combobox", items=["False", "True"], param_id="lifetime_itegrate", plot_type = "gallery"), 1, 1)
         return grid_parameters
     
     def violin_box(self):

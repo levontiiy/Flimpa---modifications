@@ -1,4 +1,4 @@
-"""Tests for FLIMfit-style auto-segmentation."""
+"""Tests for intensity auto-segmentation."""
 
 import numpy as np
 

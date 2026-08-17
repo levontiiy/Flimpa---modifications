@@ -1,9 +1,10 @@
-"""Tests for FLIMfit-style single-exponential decay fitting."""
+"""Tests for single-exponential decay fitting."""
 
 import numpy as np
 import pytest
 
 from utils.decay_fitting import (
+    DECAY_FIT_UI_ENABLED,
     autosample_decay,
     conv_irf_exponential,
     fit_single_exponential,
@@ -21,6 +22,10 @@ from utils.shared_data import SharedData
 def _t0_start(t_ns: np.ndarray) -> float:
     """Synthetic decays: t₀ at first channel (minimal baseline window)."""
     return float(np.asarray(t_ns, dtype=np.float64)[0])
+
+
+def test_decay_fit_hidden_from_ui():
+    assert DECAY_FIT_UI_ENABLED is False
 
 
 def test_conv_irf_exponential_positive():

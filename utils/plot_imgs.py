@@ -222,6 +222,11 @@ class PlotImages():
                              vmin=float(self.shared_info.config["lifetime_vmin"]), vmax=float(self.shared_info.config["lifetime_vmax"]))
         ax.set_title(self.shared_info.config["selected_file"], color='white', fontsize=10)
 
+        # optional: overlay integrated intensity (sum over time channels) on the lifetime map
+        if self.shared_info.config["lifetime_itegrate"] == "True":
+            intensity = self.shared_info.results_dict.get(self.shared_info.config["selected_file"])["sample_data"].sum(0)
+            ax.imshow(intensity, cmap='gray', vmin=0, vmax=int(intensity[intensity!=0].max()-intensity[intensity!=0].mean()),  alpha = 0.6)
+
         ax.patch.set_facecolor((0, 0, 0, 1.0))
 
         # Adjust colorbar size to match the image
@@ -381,6 +386,13 @@ class PlotImages():
             im = ax_gal.imshow(tau_img, cmap=tau_cmap,
                             vmin=float(self.shared_info.config["lifetime_vmin"]),
                             vmax=float(self.shared_info.config["lifetime_vmax"]))
+
+            # optional: overlay integrated intensity on the lifetime gallery
+            if self.shared_info.config["lifetime_itegrate"] == "True":
+                intensity = data_dict[key]["sample_data"].sum(0)
+                ax_gal.imshow(intensity, cmap='gray', vmin=0,
+                            vmax=int(intensity[intensity != 0].max() - intensity[intensity != 0].mean()),
+                            alpha=0.5)
 
             images.append(im)  # Add the image to the list
             fontsize = 8 if len(key) < 25 else 6

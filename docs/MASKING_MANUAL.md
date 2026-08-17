@@ -29,7 +29,7 @@ On **Intensity display** and **Lifetime maps**, a small **Instruments ▾** butt
 3. The menu closes (use **Back** to leave without choosing).
 4. Click **Instruments ▾** again to reopen.
 
-> **Note:** **Auto segment** is temporarily hidden from the Instruments menu (can crash on some data). The implementation remains in `utils/auto_segmentation.py`; set `AUTO_SEGMENT_UI_ENABLED = True` there to restore it.
+> **Note:** **Auto segment** is not shown in the Masking menu (kept in code for a later UI). Implementation: `utils/auto_segmentation.py`. Set `AUTO_SEGMENT_UI_ENABLED = True` there to restore it.
 
 When **Erase** is active, the button reads **Instruments · Erase ▾**.
 
@@ -44,10 +44,10 @@ When **Erase** is active, the button reads **Instruments · Erase ▾**.
 | **Erase** | Toggle: Polygon / Rectangle / Lasso / Brush **remove** mask inside the drawn area |
 | **Clear mask** | Remove all regions for the selected file |
 
-**Brush (FLIMfit-style):**
+**Brush:**
 
 - A new stroke on empty background creates a **new region label**.
-- If you **start on an existing region**, you **extend that label** (same as FLIMfit paint).
+- If you **start on an existing region**, you **extend that label**.
 - Mask updates when you **release** the mouse button.
 
 **Erase (edit / delete parts):**
@@ -64,7 +64,7 @@ When **Erase** is active, the button reads **Instruments · Erase ▾**.
 
 **Instruments → Auto segment** runs an algorithm on the **integrated intensity image** (sum over time channels) of the **selected file**, then replaces the current mask. You can refine the result with **Brush** and **Erase**.
 
-Algorithms are ported from FLIMfit’s intensity-based segmentation (`otsu_oht_segmentation.m`, `nth_segmentation.m`).
+Algorithms: **Otsu + top-hat** and **nonlinear top-hat (nth)** on the intensity image.
 
 ### Pipeline (both algorithms)
 
@@ -81,7 +81,7 @@ If nothing passes the filters, FLIMPA shows: *“No regions were found…”*
 
 ### Algorithm 1: Otsu + top-hat
 
-**Best for:** relatively uniform background with bright objects; similar to FLIMfit “Otsu + OHT”.
+**Best for:** relatively uniform background with bright objects.
 
 **Steps:**
 
@@ -103,11 +103,11 @@ If nothing passes the filters, FLIMPA shows: *“No regions were found…”*
 
 ### Algorithm 2: Nonlinear top-hat (nth)
 
-**Best for:** uneven background, dim structures; FLIMfit’s local-threshold “nth” method.
+**Best for:** uneven background, dim structures.
 
 **Steps:**
 
-1. **Nonlinear top-hat**: `image × box_avg(image, scale) / box_avg(image, scale × rel_bg_scale)²` (FLIMfit `nonlinear_tophat.m`).
+1. **Nonlinear top-hat**: `image × box_avg(image, scale) / box_avg(image, scale × rel_bg_scale)²`.
 2. Subtract 1, normalise by global max (capped at 10000).
 3. Pixels with normalised response ≥ **threshold** (after internal scaling) → foreground.
 4. Same smoothing, labelling, and **min_size** filter as Otsu.
@@ -117,7 +117,7 @@ If nothing passes the filters, FLIMPA shows: *“No regions were found…”*
 | Parameter | Default | Meaning |
 |-----------|---------|---------|
 | **scale** | 100 | **Object width (px)** for the inner box average (local mean window ≈ this size). |
-| **rel_bg_scale** | 2.0 | Ratio of **background window / object window**. Must be ≥ 1. Larger → broader background estimate (more aggressive background suppression). FLIMfit default: 2. |
+| **rel_bg_scale** | 2.0 | Ratio of **background window / object window**. Must be ≥ 1. Larger → broader background estimate (more aggressive background suppression). Default: 2. |
 | **threshold** | 0.1 | Cut-off on the **normalised** nth image (0–1). **Lower → more foreground**. If nothing is detected, try 0.05; if too much background, try 0.2–0.3. |
 | **smoothing** | 5 | Same as Otsu algorithm. |
 | **min_size** | 200 | Same as Otsu algorithm. |
@@ -178,10 +178,10 @@ Masks are **uint16 TIFF**, one label per region.
 
 Recognised mask filenames for sample `{stem}`:
 
-- `{stem} segmentation.tif` (legacy)
+- `{stem}_segmentation.tif`
 - `{stem}_mask_polygon.tif`
-- `{stem}_mask_FLIMFIT.tif` (legacy, still imported)
 - `{stem}_mask_ROI.tif`
+- `{stem} segmentation.tif` (legacy name with a space; still imported)
 
 Custom names work when importing a **single** mask with a **single** raw file, or if the filename starts with `{stem}_`.
 
@@ -200,17 +200,4 @@ Custom names work when importing a **single** mask with a **single** raw file, o
 | `utils/toolbar.py` | Import with masks, save menu |
 | `utils/phasor_plot.py` | Phasor ROI → `_mask_ROI.tif` |
 
----
-
-## Comparison with FLIMfit
-
-| Feature | FLIMfit | FLIMPA |
-|---------|---------|--------|
-| Paint brush | Yes | Yes |
-| Auto Otsu / nth on intensity | Yes | Yes |
-| Membrane / extra algorithms | Yes | Not yet |
-| Region filtering (roundness, intensity %) | Yes | Not yet |
-| Phasor correlation histogram masks | Yes | Ellipse on g–s only |
-| Batch copy mask to all files | Yes | Per file |
-
-Workflow in FLIMPA: **Auto segment → Brush / Erase → Save manual mask → Run analysis**.
+Workflow in FLIMPA: **draw mask → save → Run analysis**. (Auto segment can be re-enabled later.)

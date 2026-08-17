@@ -40,29 +40,41 @@ To run the software, please download the executable (<a href="https://github.com
 
 # Installation
 
-FLIMPA can be easily run on Windows using the <a href="https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2" title=".exe" download>.exe</a> file. Alternatively, you can clone the GitHub repository and run the software following these steps:
+FLIMPA can be run from this repository in any IDE (PyCharm, VS Code, Cursor) or from a terminal.
 
-1. **Download the repository**
+1. **Download / clone the repository**
     ```bash
-    git clone https://github.com/SofiaKapsiani/FLIMPA.git
-    cd FLIMPA
+    git clone https://github.com/levontiiy/Flimpa---modifications.git
+    cd Flimpa---modifications
     ```
 
-2. **Create and activate a virtual environment**
+2. **Create and activate a virtual environment** (Python 3.11 or newer)
     ```bash
     conda create --name flimpa_env python=3.11 -y
     conda activate flimpa_env
     ```
+    Or with the standard library:
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate          # macOS / Linux
+    .venv\Scripts\activate             # Windows
+    ```
 
-3. **Install the required packages**
+3. **Install the required packages** (needs internet once)
     ```bash
     pip install -r requirements.txt
     ```
+
+    In **PyCharm**: open the folder → Settings → Python Interpreter → add a virtualenv → install from `requirements.txt` (or let PyCharm prompt to install).
 
 4. **Run the software**
     ```bash
     python main.py
     ```
+
+    In PyCharm: right-click `main.py` → Run.
+
+The original Windows `.exe` (without this fork’s extra features) is still at [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
 
 # Usage
 
@@ -95,7 +107,7 @@ There are three different options for importing the data:
 
 -	Import raw data
 -	Import raw data and assign experimental conditions (e.g treated vs untreated)
--	Import raw data with manually created masks (draw in FLIMPA or import FLIMfit TIFFs — see [docs/MASKING_MANUAL.md](docs/MASKING_MANUAL.md))
+-	Import raw data with manually created masks (draw in FLIMPA or import mask TIFFs — see [docs/MASKING_MANUAL.md](docs/MASKING_MANUAL.md))
 
 *Example: Importing Raw Data and Assigning Experimental Conditions*
 

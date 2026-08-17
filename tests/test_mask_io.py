@@ -27,14 +27,11 @@ def test_mask_path_for():
     assert p.name == "cell_a_mask_ROI.tif"
     p2 = mask_path_for("cell_a", MASK_KIND_POLYGON, "/tmp")
     assert p2.name == "cell_a_mask_polygon.tif"
-    p3 = mask_path_for("cell_a", "FLIMFIT", "/tmp")
-    assert p3.name == "cell_a_mask_polygon.tif"
 
 
 def test_default_mask_filename():
     assert default_mask_filename("cell_a", "ROI") == "cell_a_mask_ROI.tif"
     assert default_mask_filename("cell_a", MASK_KIND_POLYGON) == "cell_a_mask_polygon.tif"
-    assert default_mask_filename("cell_a", "FLIMFIT") == "cell_a_mask_polygon.tif"
 
 
 def test_ensure_tif_path():
@@ -45,40 +42,44 @@ def test_ensure_tif_path():
 
 def test_resolve_mask_path_priority(tmp_path):
     stem = "sample"
-    legacy = tmp_path / f"{stem} segmentation.tif"
-    legacy.write_bytes(b"")
-    assert resolve_mask_path(tmp_path, stem) == legacy
+    segmentation = tmp_path / f"{stem}_segmentation.tif"
+    segmentation.write_bytes(b"")
+    assert resolve_mask_path(tmp_path, stem) == segmentation
 
-    legacy.unlink()
+    segmentation.unlink()
     roi = tmp_path / f"{stem}_mask_ROI.tif"
     roi.write_bytes(b"")
     assert resolve_mask_path(tmp_path, stem) == roi
 
 
-def test_resolve_mask_path_polygon_and_legacy(tmp_path):
+def test_resolve_mask_path_legacy_space_name(tmp_path):
+    stem = "sample"
+    legacy = tmp_path / f"{stem} segmentation.tif"
+    legacy.write_bytes(b"")
+    assert resolve_mask_path(tmp_path, stem) == legacy
+
+
+def test_resolve_mask_path_polygon(tmp_path):
     stem = "sample"
     polygon = tmp_path / f"{stem}_mask_polygon.tif"
     polygon.write_bytes(b"")
-    legacy = tmp_path / f"{stem}_mask_FLIMFIT.tif"
-    legacy.write_bytes(b"")
+    extra = tmp_path / f"{stem}_mask_extra.tif"
+    extra.write_bytes(b"")
     assert resolve_mask_path(tmp_path, stem) == polygon
-
-    polygon.unlink()
-    assert resolve_mask_path(tmp_path, stem) == legacy
 
 
 def test_resolve_mask_from_files_exact_name(tmp_path):
     stem = "sample"
     roi = tmp_path / f"{stem}_mask_ROI.tif"
     roi.write_bytes(b"")
-    other = tmp_path / "other_mask_FLIMFIT.tif"
+    other = tmp_path / "other_mask_polygon.tif"
     other.write_bytes(b"")
     assert resolve_mask_from_files(stem, [roi, other]) == roi
 
 
 def test_resolve_mask_from_files_stem_prefix(tmp_path):
     stem = "treated40uM_3"
-    custom = tmp_path / f"{stem}_mask_FLIMFIT_1.tif"
+    custom = tmp_path / f"{stem}_mask_polygon_1.tif"
     custom.write_bytes(b"")
     assert resolve_mask_from_files(stem, [custom]) == custom
 

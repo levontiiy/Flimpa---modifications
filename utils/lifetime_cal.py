@@ -286,8 +286,7 @@ class LifetimeData(QObject):
             if mask_path is None:
                 raise FileNotFoundError(
                     f"No mask found for '{file_name}'. Expected a matching TIFF such as "
-                    f"'{{name}} segmentation.tif', '{{name}}_mask_ROI.tif', '{{name}}_mask_polygon.tif', "
-                    f"or legacy '{{name}}_mask_FLIMFIT.tif'."
+                    f"'{{name}}_segmentation.tif', '{{name}}_mask_ROI.tif', or '{{name}}_mask_polygon.tif'."
                 )
             mask_arr = load_mask_array(mask_path)
             masked_data = np.where(mask_arr == 0, np.zeros_like(data), data)

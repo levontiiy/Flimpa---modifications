@@ -3,7 +3,7 @@ Parameter dialog for auto-segmentation (Instruments → Auto segment).
 
 Field definitions and defaults come from utils.auto_segmentation.ALGORITHMS.
 
-Archived from UI while AUTO_SEGMENT_UI_ENABLED is False — see auto_segmentation.py.
+FUTURE / NOT IN UI: dialog is kept for later. Gated by AUTO_SEGMENT_UI_ENABLED in auto_segmentation.py.
 """
 
 from PySide6.QtWidgets import (
@@ -21,11 +21,11 @@ from utils.auto_segmentation import ALGORITHMS
 
 
 class AutoSegmentDialog(QDialog):
-    """Algorithm picker + per-algorithm numeric parameters (FLIMfit defaults)."""
+    """Algorithm picker + per-algorithm numeric parameters."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Auto-segment (FLIMfit-style)")
+        self.setWindowTitle("Auto-segment")
         layout = QVBoxLayout(self)
         layout.addWidget(
             QLabel(

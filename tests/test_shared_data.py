@@ -9,6 +9,7 @@ def test_lifetime_colormap_config_keys():
     assert "lifetime_cmap_file" in sd.config
     assert sd.config["lifetime_cmap"] == "Rainbow"
     assert sd.config["lifetime_cmap_file"] == "None"
+    assert sd.config["lifetime_itegrate"] == "False"
 
 
 def test_phasor_layers_structure():

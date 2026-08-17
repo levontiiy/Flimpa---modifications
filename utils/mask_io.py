@@ -2,10 +2,10 @@
 Save, load, and apply manual masks.
 
 Naming conventions:
-  {stem} segmentation.tif
+  {stem}_segmentation.tif  — imported intensity/segmentation mask
   {stem}_mask_polygon.tif  — manual / auto mask from Instruments
-  {stem}_mask_FLIMFIT.tif  — legacy name (still recognised on import)
   {stem}_mask_ROI.tif      — phasor ellipse ROI
+  {stem} segmentation.tif  — legacy name with a space (still recognised on import)
 
 See docs/MASKING_MANUAL.md for import/export workflow.
 """
@@ -19,16 +19,14 @@ from utils.shared_data import SharedData
 
 MASK_KIND_POLYGON = "polygon"
 MASK_KIND_ROI = "ROI"
-_LEGACY_POLYGON_KIND = "FLIMFIT"
 
 
 def _normalize_mask_kind(kind: str) -> str:
-    """Map UI / legacy kind strings to canonical mask kind."""
+    """Map UI kind strings to canonical mask kind."""
     key = (kind or "").strip()
-    upper = key.upper()
-    if upper == MASK_KIND_ROI:
+    if key.upper() == MASK_KIND_ROI:
         return MASK_KIND_ROI
-    if upper in (_LEGACY_POLYGON_KIND, MASK_KIND_POLYGON.upper()):
+    if key.lower() == MASK_KIND_POLYGON:
         return MASK_KIND_POLYGON
     return key
 
@@ -61,10 +59,10 @@ def mask_path_for(stem: str, kind: str, folder: str | Path) -> Path:
 def mask_basename_candidates(stem: str) -> list[str]:
     """Recognised mask filenames for a sample stem (new names first, then legacy)."""
     return [
-        f"{stem} segmentation.tif",
+        f"{stem}_segmentation.tif",
         f"{stem}_mask_ROI.tif",
         f"{stem}_mask_polygon.tif",
-        f"{stem}_mask_{_LEGACY_POLYGON_KIND}.tif",
+        f"{stem} segmentation.tif",  # legacy; space in name
     ]
 
 

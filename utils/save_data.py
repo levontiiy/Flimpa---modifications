@@ -56,6 +56,10 @@ def save_tau(output_dir, progress_dialog,  lifetime_type, results_dict, config):
                 img_plot = ax.imshow(tau_img, cmap=tau_cmap,
                                     vmin=float(config["lifetime_vmin"]), vmax=float(config["lifetime_vmax"]))
 
+                if config["lifetime_itegrate"] == "True":
+                    intensity = results_dict[filename]["sample_data"].sum(0)
+                    ax.imshow(intensity, cmap='gray', vmin=0, vmax=int(intensity[intensity != 0].max() - intensity[intensity != 0].mean()), alpha=0.5)
+
                 ax.patch.set_facecolor((0, 0, 0, 1.0))
 
                 divider = make_axes_locatable(ax)
@@ -141,6 +145,11 @@ def save_gallery_view(output_dir, progress_dialog, file_name, data_dict, config)
             im = ax_gal.imshow(tau_img, cmap=tau_cmap, aspect='equal',
                             vmin=float(config["lifetime_vmin"]),
                             vmax=float(config["lifetime_vmax"]))
+            if config.get("lifetime_itegrate") == "True":
+                intensity = data_dict[key]["sample_data"].sum(0)
+                ax_gal.imshow(intensity, cmap='gray', vmin=0,
+                            vmax=int(intensity[intensity != 0].max() - intensity[intensity != 0].mean()),
+                            alpha=0.5)
 
             images.append(im)  # Add the image to the list
             fontsize = 8 if len(key) < 25 else 6

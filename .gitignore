@@ -1,4 +1,4 @@
-# Large third-party / reference trees (not used to run FLIMPA)
+# Leftover third-party tree (not used to run FLIMPA)
 FLIMFIT/
 
 # Local dev backups and extra test data (not part of the app distribution)
@@ -8,6 +8,7 @@ New_data_1/
 # iCloud duplicate copies
 * 2.*
 * 2.py
+"Masks created "*
 
 # Virtual environments
 flimpa_env/
@@ -30,10 +31,7 @@ dist/
 FLIMPA (v1.0).spec
 FLIMPA.spec
 
-# Offline wheel bundles are large; keep scripts/docs, not binary wheels
-offline/wheels-*/
+# Offline installers (removed from the project; ignore leftovers)
+offline/
 
-# Large FLIMFIT installers / app bundles (exceed GitHub file size limits)
-FLIMFIT/*.app/
-FLIMFIT/*.dmg
 *.dmg

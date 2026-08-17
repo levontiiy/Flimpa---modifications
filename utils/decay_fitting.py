@@ -1,11 +1,21 @@
 """
 Single-exponential decay fitting for the pixel decay inspector.
 
-Ports the FLIMfit TCSPC model (IRF reconvolution + Poisson deviance) from
-estimate_irf.m / FLIMGlobalFitController.cpp in simplified form for one ROI/pixel.
+TCSPC model: IRF reconvolution + Poisson deviance, for one ROI/pixel.
+
+---
+FUTURE / NOT IN UI:
+  Fitting is implemented here but is not shown in Baseline check (no orange fit,
+  map-τ overlay, IRF / peak-align / slide controls). Baseline check still plots
+  the measured decay only.
+  To restore fit overlays, set DECAY_FIT_UI_ENABLED = True and keep the controls
+  in utils/decay_window.py.
 """
 
 from __future__ import annotations
+
+# Re-enable Baseline check fit overlays when the UI is ready to ship.
+DECAY_FIT_UI_ENABLED = False
 
 from dataclasses import dataclass
 
@@ -16,7 +26,7 @@ from utils.shared_data import SharedData
 
 _MIN_TAU_NS = 0.15
 _MAX_TAU_NS = 50.0
-_AUTOSAMPLE_MIN_COUNTS = 8.0  # photons per merged bin (FLIMfit ~20; was 10)
+_AUTOSAMPLE_MIN_COUNTS = 8.0  # photons per merged bin
 _SPARSE_PHOTON_WARN = 150
 
 
@@ -29,11 +39,11 @@ def autosample_decay(
   smoothing_area: float = 1.0,
 ) -> tuple[np.ndarray, np.ndarray, bool]:
   """
-  Time rebinnning from FLIMfit FLIMData::DetermineAutoSampling.
+  Time rebinning of sparse decays (merge adjacent bins from the tail).
 
   Merges adjacent bins (from the tail backward) until each super-bin holds
   enough photons for a stable monoexponential fit on sparse pixels
-  (default target: 8 photons/bin; FLIMfit uses ~20).
+  (default target: 8 photons/bin).
   """
   t = np.asarray(t_ns, dtype=np.float64)
   y = np.asarray(counts, dtype=np.float64)
@@ -97,7 +107,7 @@ def _tau_search_range(
   shared: SharedData,
 ) -> tuple[float, float, float]:
   """
-  τ bounds centred on mean-lifetime estimate (FLIMfit EstimateAverageLifetime).
+  τ bounds centred on the mean-lifetime estimate.
 
   Unlike the old 0.1×–5× map-τ window, this avoids τ_fit = τ_map/10 artefacts.
   """
@@ -186,7 +196,7 @@ def _align_irf(t_sample_s: np.ndarray, t_irf_s: np.ndarray, irf: np.ndarray) -> 
 
 def conv_irf_exponential(t_s: np.ndarray, irf: np.ndarray, tau_s: float) -> np.ndarray:
   """
-  Exponential reconvolution with a discrete IRF (FLIMfit estimate_irf.m conv_irf).
+  Exponential reconvolution with a discrete IRF.
   t_s and tau_s in seconds.
   """
   t_s = np.asarray(t_s, dtype=np.float64)
@@ -227,7 +237,7 @@ def _decay_shape_peak_normalized(
   Unit peak reconvolved shape h(t; τ) with max(h) = 1.
 
   Amplitude A in y(t) = A·h(t) is then the model height at the first maximum
-  (FLIMfit solves scale separately via I = dc\\d on the unscaled shape).
+  (scale is solved separately on the unscaled shape).
   """
   tau_s = max(float(tau_s), 1e-15)
   if used_irf and irf_on_grid is not None:
@@ -333,7 +343,7 @@ def _model_with_irf(t_s: np.ndarray, irf: np.ndarray, tau_s: float, amplitude: f
 
 def _poisson_deviance(observed: np.ndarray, expected: np.ndarray) -> float:
   """
-  FLIMfit-style reduced Poisson deviance (estimate_irf.m).
+  Reduced Poisson deviance.
 
   Includes y=0 bins so a model that stays high in the tail is penalised.
   """
@@ -579,7 +589,7 @@ def fit_single_exponential(
   hit_lower = tau_fit <= tau_min * 1.02
   hit_upper = tau_fit >= tau_max * 0.98
 
-  msg = "IRF from reference" if used_irf else "no IRF — exponential only (load reference for FLIMfit-style fit)"
+  msg = "IRF from reference" if used_irf else "no IRF — exponential only (load a reference to use IRF reconvolution)"
   y_peak = float(counts_orig[fit_mask].max())
   msg += f"; A = {amp_fit:.1f} (fixed to data peak {y_peak:.0f} at/after t₀ before τ fit)"
   msg += f"; t₀ = {t0_ns:.2f} ns (fit from baseline window; model not time-shifted)"
@@ -590,7 +600,7 @@ def fit_single_exponential(
   if sparse_fit:
     msg += "; Poisson fit from t₀ onward (tail zeros penalised)"
   if autosampled:
-    msg += f"; autosampled {len(t_ns_orig)}→{len(t_fit_ns)} bins (FLIMfit-style)"
+    msg += f"; autosampled {len(t_ns_orig)}→{len(t_fit_ns)} bins"
   if total < _SPARSE_PHOTON_WARN:
     msg += "; sparse pixel — prefer τ map or a brighter pixel"
   if hit_lower:

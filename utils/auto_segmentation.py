@@ -1,24 +1,24 @@
 """
-FLIMfit-style intensity auto-segmentation (editable after running).
+Intensity auto-segmentation (editable after running).
 
-Algorithms mirror FLIMfit SegmentationFunctions:
-  - otsu_oht_segmentation.m
-  - nth_segmentation.m (+ Support/nonlinear_tophat.m, box_average.m)
+Algorithms:
+  - otsu_oht (Otsu threshold after morphological top-hat)
+  - nth (nonlinear top-hat / local background)
 
 See docs/MASKING_MANUAL.md for parameter definitions and tuning.
 
 ---
-ARCHIVED FROM UI (possible area of improvement):
-  Auto segment is implemented but hidden in the Instruments menu because it can
-  crash the app on some datasets/platforms. Set AUTO_SEGMENT_UI_ENABLED = True
-  in this module to re-expose Instruments → Auto segment.
+FUTURE / NOT IN UI:
+  Auto-segmentation is implemented here but is not shown in the Masking menu.
+  Keep this module (and mask_segment_dialog.py) for a later, stable UI.
+  To re-enable Instruments → Auto segment, set AUTO_SEGMENT_UI_ENABLED = True.
   Entry points: mask_instruments.MaskInstrumentsOverlay, ui_layout.run_auto_segmentation,
   mask_editor.run_auto_segmentation, mask_segment_dialog.AutoSegmentDialog.
 """
 
 from __future__ import annotations
 
-# Re-enable Instruments → Auto segment when stability is verified.
+# Re-enable Masking → Auto segment when the UI is ready to ship.
 AUTO_SEGMENT_UI_ENABLED = False
 
 import numpy as np
@@ -27,7 +27,7 @@ from skimage import measure, morphology, filters
 
 
 def _box_average(image: np.ndarray, diameter: int) -> np.ndarray:
-    """Separable box filter with edge normalisation (FLIMfit box_average.m)."""
+    """Separable box filter with edge normalisation."""
     r = max(1, int(round(diameter)))
     kernel = np.ones(r, dtype=np.float64) / r
     z = ndimage.convolve1d(image.astype(np.float64), kernel, axis=0, mode="nearest")
@@ -40,7 +40,7 @@ def _box_average(image: np.ndarray, diameter: int) -> np.ndarray:
 
 def _nonlinear_tophat(image: np.ndarray, scale: float, rel_bg_scale: float) -> np.ndarray:
     """
-    FLIMfit nonlinear_tophat.m — local contrast enhancement using two box scales.
+    Local contrast enhancement using two box scales.
     rel_bg_scale > 1 uses a wider window for background estimation.
     """
     d = max(1, int(round(scale)))
@@ -52,7 +52,7 @@ def _nonlinear_tophat(image: np.ndarray, scale: float, rel_bg_scale: float) -> n
 
 
 def _morph_smooth(binary: np.ndarray, smoothing: int) -> np.ndarray:
-    """Opening-like smooth: erode then dilate (FLIMfit post-threshold step)."""
+    """Opening-like smooth: erode then dilate after thresholding."""
     radius = max(1, int(round(abs(smoothing))))
     se = morphology.disk(radius)
     eroded = morphology.erosion(binary, se)
@@ -66,7 +66,7 @@ def _label_regions(
 ) -> np.ndarray:
     """
     Label 8-connected foreground and renumber kept regions 1..N.
-    Drops components smaller than min_size (FLIMfit min area filter).
+    Drops components smaller than min_size.
     """
     labelled = measure.label(binary, connectivity=2)
     if labelled.max() == 0:
@@ -97,7 +97,7 @@ def otsu_oht_segmentation(
     min_size: int = 200,
 ) -> np.ndarray:
     """
-    Histogram-based segmentation with local background removal (FLIMfit otsu_oht).
+    Histogram-based segmentation with local background removal (Otsu + top-hat).
 
     scale: morphological disk radius (~object width in px).
     sensitivity: divides Otsu threshold; >1 includes more pixels.
@@ -136,7 +136,7 @@ def nth_segmentation(
     min_size: int = 200,
 ) -> np.ndarray:
     """
-    Local-threshold segmentation via nonlinear top-hat (FLIMfit nth_segmentation).
+    Local-threshold segmentation via nonlinear top-hat.
 
     scale: inner box width (~object size in px).
     rel_bg_scale: background box = scale × this ratio (≥1).
@@ -154,7 +154,7 @@ def nth_segmentation(
     return _label_regions(binary, min_size)
 
 
-# Registry for AutoSegmentDialog: defaults match FLIMfit shipped values
+# Registry for AutoSegmentDialog: shipped default values
 ALGORITHMS = {
     "Otsu + top-hat": {
         "fn": otsu_oht_segmentation,

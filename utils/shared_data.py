@@ -66,6 +66,7 @@ class SharedData:
         lifetime_vmin: 0
         lifetime_vmax: 10
         lifetime_map: "average"
+        lifetime_itegrate: "False"
         lifetime_cmap: "Rainbow" # preset name or "Custom" — see utils/colormaps.py
         lifetime_cmap_file: "None" # path when lifetime_cmap is Custom; else ignored
 

@@ -1,5 +1,5 @@
 """
-FLIMfit-style manual region drawing on the intensity / lifetime image.
+Manual region drawing on the intensity / lifetime image.
 
 Tools: polygon, rectangle, lasso, brush, auto-segmentation (via run_auto_segmentation).
 Labelled uint16 mask: 0 = background, 1..N = regions.
@@ -347,7 +347,7 @@ class ManualMaskEditor:
         self._commit_mask()
 
     def run_auto_segmentation(self, algorithm: str, params: dict) -> bool:
-        """Run FLIMfit-style auto-segment; replaces mask. Returns False if no regions found.
+        """Run intensity auto-segment; replaces mask. Returns False if no regions found.
 
         Archived from UI while AUTO_SEGMENT_UI_ENABLED is False — see auto_segmentation.py.
         """
@@ -397,7 +397,7 @@ class ManualMaskEditor:
         )
 
     def _start_stroke_region(self, x: float, y: float) -> int:
-        """FLIMfit paint: extend existing label under cursor, else allocate a new region id."""
+        """Paint: extend existing label under cursor, else allocate a new region id."""
         if self.antimask_mode:
             return 0
         yi = int(round(y))

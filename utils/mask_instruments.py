@@ -207,7 +207,7 @@ class MaskInstrumentsOverlay:
             "Rectangle": "Drag a rectangle on the image.",
             "Lasso": "Draw a freehand outline.",
             "Brush": "Paint regions; start on existing region to extend it.",
-            "Auto segment": "FLIMfit-style auto-segmentation, then refine manually.",
+            "Auto segment": "Intensity auto-segmentation, then refine manually.",
             "Erase": "Edit mask: Polygon / Rectangle / Lasso / Brush remove parts (set pixels to 0).",
             "Clear mask": "Remove all regions for this file.",
         }
