@@ -2,17 +2,17 @@
   <img src="https://github.com/user-attachments/assets/73dee1af-b5dc-4211-b0ce-ba623fe0bdad" alt="icon_filimpa" width="70%">
 </div>
 
-# FLIMPA
+# FLIMPA 1.5.0
 
 **FLIMPA** is an open-source app for phasor-plot analysis of raw Time-Correlated Single Photon Counting (TCSPC) Fluorescence Lifetime Imaging Microscopy (FLIM) data.
 
-This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2), released here as **FLIMPA 1.5.0**. It adds in-app masking, FRET maps, baseline-check decay curves, colormaps, and related UI. Run it from source (the original Windows `.exe` does not include these extras).
+This repository is **FLIMPA 1.5.0** — a modified build based on [upstream FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It keeps the core phasor workflow and adds in-app masking, FRET maps, baseline-check decay curves, colormaps, export options, and UI updates documented below.
 
 > **FLIMPA: A Versatile Software for Fluorescence Lifetime Imaging Microscopy Phasor Analysis**, published in *Analytical Chemistry*  
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
 > [Molecular Neuroscience Group](https://www.ceb-mng.org/) and [Laser Analytics Group](https://laser.ceb.cam.ac.uk/) (University of Cambridge)
 
-[[FLIMPA (1.4)](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual (PowerPoint)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
+[[FLIMPA 1.5.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual (PowerPoint)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
 
 ## Features
 
@@ -20,26 +20,39 @@ This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaK
   <img src="https://github.com/user-attachments/assets/48a6a9b8-3d79-4cb2-a910-56432db24f60" alt="flimpa_abstract_figure" width="80%">
 </div>
 
-- Phasor plot generation and analysis
+### Core analysis (from FLIMPA 1.4)
+
+- Phasor plot generation and analysis (single file, by condition, scatter / histogram / contour)
 - Fluorescence lifetime and intensity map visualisation
-- ROI selection on the phasor plot (ellipse), saved as a mask if you want it in analysis
+- ROI selection on the phasor plot (ellipse), saved as a mask for analysis
 - Gallery plots of fluorescence lifetime and intensity maps
 - Violin plot analysis
-- Table of mean fluorescence lifetime values per image
-- Manual masking on intensity / lifetime images (polygon, lasso, brush) and mask import/export
-- FRET efficiency maps (`E = 1 − τ / τ_D`)
-- Baseline check: click a pixel on the lifetime map to inspect the decay curve
-- Lifetime colormap presets and custom colormap loading
+- Table of mean fluorescence lifetime values per image (group by condition or sample)
+- Import `.sdt`, `.ptu`, and `.tif` stacks; reference correction; optional IRF overlay
+
+### Added in FLIMPA 1.5.0
+
+- **Manual masking** on intensity / lifetime / FRET images — polygon, lasso, brush, delete region, eraser (with adjustable brush/eraser size 1–30 px); mask import/export as labelled uint16 TIFF
+- **Mask save** menu — save manual (polygon) or phasor ROI masks; clear mask for selected file
+- **FRET efficiency maps** — `E = 1 − τ / τ_D`; FRET tab appears after analysis (rightmost tab)
+- **Baseline check** — click a pixel on the lifetime map to inspect the decay curve (log scale, map τ curve, IRF overlay, t₀ crop)
+- **Lifetime colormap** presets and custom colormap loading (CSV/TXT or colour-strip image)
+- **Phasor plot** — **G** and **S** axis labels; **Layers** list on gallery phasor plots (show/hide files, reorder)
+- **Image navigation** — pan, zoom, and reset on intensity, lifetime, and FRET views
+- **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
+- **macOS app** — `FLIMPA.v1.5.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0); PyInstaller build scripts for macOS and Windows
 
 ---
 
-# Installation
+# Installation — FLIMPA 1.5.0
+
+**Download:** [FLIMPA.v1.5.0.dmg](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0) (macOS, Apple Silicon build) — or run from source below.
 
 Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux. You can run it from a terminal or from an IDE (PyCharm, VS Code, Cursor).
 
-There is no Windows `.exe` for this fork yet (build on Windows with `scripts/build_release.sh`). **macOS:** download **`FLIMPA.v1.5.0.dmg`** from [Releases v1.5.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0). The original Windows `.exe` (without these extra features) is still at [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
+There is no Windows `.exe` for this fork yet (build on Windows with `FLIMPA.spec` / PyInstaller). Upstream **FLIMPA 1.4.2** Windows `.exe` (without 1.5.0 features) is at [SofiaKapsiani/FLIMPA](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
 
-To build standalone apps yourself, use **PyInstaller** (already listed in `requirements.txt`). Run `bash scripts/build_release.sh 1.5.0` from the project root. Build on each target OS — a Windows `.exe` must be built on Windows; a macOS `.app` / `.dmg` must be built on macOS.
+To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 1.5.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --clean --noconfirm FLIMPA.spec` and zip `dist/FLIMPA/`.
 
 **Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` are gitignored.
 
@@ -182,6 +195,7 @@ Set these parameters (left panel), then click **Run Phasor Plot Analysis**:
 
 You can show one image or several samples together.
 
+- **G** / **S** axis labels on the phasor plot
 - **τ Labels** — lifetime ticks on the universal circle
 - **ROI** — draw an ellipse on the phasor; non-selected pixels are dimmed on the lifetime map (display only until you save the ROI mask)
 - **Individual** / **Condition** — one file vs grouped by experimental condition (gallery)
@@ -229,7 +243,7 @@ In the window:
 
 ## FRET
 
-The **FRET** tab shows `E = 1 − τ / τ_D`. Settings:
+After analysis, the **FRET** tab is the rightmost image tab. It shows `E = 1 − τ / τ_D`. Settings:
 
 - **Donor τ_D (ns)** — same value as **Reference lifetime**
 - **Lifetime map** — which τ map is used
