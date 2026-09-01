@@ -1,7 +1,7 @@
 """
 Manual region drawing on the intensity / lifetime image.
 
-Tools: polygon, rectangle, lasso, brush, auto-segmentation (via run_auto_segmentation).
+Tools: polygon, rectangle, lasso, brush, delete_region, auto-segmentation (via run_auto_segmentation).
 Labelled uint16 mask: 0 = background, 1..N = regions.
 
 See README.md (Masking) for user-facing documentation.
@@ -293,7 +293,7 @@ class ManualMaskEditor:
         return self.antimask_mode
 
     def _exit_drawing_tool(self):
-        """Stop polygon / rectangle / lasso / brush. Leave Baseline check (inspect) on."""
+        """Stop polygon / rectangle / lasso / brush / delete_region. Leave Baseline check (inspect) on."""
         if self._tool is not None and self._tool != "inspect":
             self.deactivate()
         self.antimask_mode = False
@@ -500,6 +500,29 @@ class ManualMaskEditor:
         if self._inspect_xy is not None:
             self._draw_inspect_marker()
 
+    def _on_delete_region_press(self, event):
+        """Click a labelled pixel to zero every pixel with that region id."""
+        if not self._event_in_axes(event) or event.button != 1 or self.mask is None:
+            return
+        yi = int(round(event.ydata))
+        xi = int(round(event.xdata))
+        shape = self.mask.shape
+        if not (0 <= yi < shape[0] and 0 <= xi < shape[1]):
+            return
+        label = int(self.mask[yi, xi])
+        if label <= 0:
+            return
+        self.mask[self.mask == label] = 0
+        self.n_regions = int(self.mask.max()) if self.mask.max() > 0 else 0
+        self._commit_mask()
+
+    def _setup_delete_region(self):
+        self._disconnect_canvas_tools()
+        if self._ax is None:
+            return
+        canvas = self._ax.figure.canvas
+        self._event_cids = [canvas.mpl_connect("button_press_event", self._on_delete_region_press)]
+
     def _setup_brush(self):
         self._disconnect_canvas_tools()
         if self._ax is None:
@@ -530,7 +553,7 @@ class ManualMaskEditor:
             self._preserve_tool = False
 
     def activate_tool(self, tool: str):
-        """tool: 'poly', 'rect', 'lasso', 'brush', or 'inspect'."""
+        """tool: 'poly', 'rect', 'lasso', 'brush', 'delete_region', or 'inspect'."""
         if not self._selected_filename():
             return
         self._disable_pan_for_active_plot()
@@ -557,6 +580,12 @@ class ManualMaskEditor:
 
         if tool == "brush":
             self._setup_brush()
+            self._ax.figure.canvas.draw_idle()
+            self._sync_baseline_check_ui()
+            return
+
+        if tool == "delete_region":
+            self._setup_delete_region()
             self._ax.figure.canvas.draw_idle()
             self._sync_baseline_check_ui()
             return

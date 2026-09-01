@@ -243,9 +243,8 @@ class PhasorPlot(QWidget):
         self.ax.set_xlim([-0.005, 1])
         self.ax.set_ylim([0, 0.65])
 
-        # Change text color to dimgray
-        self.ax.xaxis.label.set_color('dimgray')  # X-axis label
-        self.ax.yaxis.label.set_color('dimgray')  # Y-axis label
+        self.ax.set_xlabel("G", color="dimgray")
+        self.ax.set_ylabel("S", color="dimgray")
         self.ax.title.set_color('dimgray')  # Plot title, if you have one
 
         # Change axes tick color to dimgray

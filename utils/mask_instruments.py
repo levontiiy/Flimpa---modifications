@@ -1,13 +1,13 @@
-"""Floating Masking control over intensity / lifetime plots.
+"""Floating Masking tools control over intensity / lifetime plots.
 
-One Masking button + vertical popup over the image.
+One Masking tools button + vertical popup over the image.
 See README.md (Masking).
 """
 
 from __future__ import annotations
 
 import numpy as np
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QFrame,
     QPushButton,
@@ -182,7 +182,7 @@ class MaskInstrumentsOverlay:
         self.ui_layout = ui_layout
         self.editor = main_window.mask_editor
 
-        self.btn = QPushButton("Masking ▾", host)
+        self.btn = QPushButton("Masking tools", host)
         self.btn.setStyleSheet(_BTN_STYLE)
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self._toggle_popup)
@@ -204,16 +204,14 @@ class MaskInstrumentsOverlay:
 
         tooltips = {
             "Polygon": "Click points on the image; close on first point or Enter.",
-            "Rectangle": "Drag a rectangle on the image.",
             "Lasso": "Draw a freehand outline.",
             "Brush": "Paint regions; start on existing region to extend it.",
+            "Delete region": "Click a labelled region to remove that whole region.",
             "Auto segment": "Intensity auto-segmentation, then refine manually.",
-            "Erase": "Edit mask: Polygon / Rectangle / Lasso / Brush remove parts (set pixels to 0).",
             "Clear mask": "Remove all regions for this file and stop the masking tool.",
         }
         for label, tool in [
             ("Polygon", "poly"),
-            ("Rectangle", "rect"),
             ("Lasso", "lasso"),
         ]:
             btn = QPushButton(label)
@@ -226,29 +224,40 @@ class MaskInstrumentsOverlay:
         brush_btn.clicked.connect(lambda: self._pick_tool("brush"))
         popup_layout.addWidget(brush_btn)
 
-        size_row = QWidget()
-        size_layout = QVBoxLayout(size_row)
-        size_layout.setContentsMargins(6, 0, 6, 4)
-        size_layout.setSpacing(2)
-        size_layout.addWidget(QLabel("Brush size (px)"))
-        self.brush_spin = QSpinBox()
-        self.brush_spin.setRange(1, 30)
-        self.brush_spin.setValue(self.editor.brush_width)
-        self.brush_spin.valueChanged.connect(self.editor.set_brush_width)
-        size_layout.addWidget(self.brush_spin)
-        popup_layout.addWidget(size_row)
-
         if AUTO_SEGMENT_UI_ENABLED:
             auto_btn = QPushButton("Auto segment")
             auto_btn.setToolTip(tooltips["Auto segment"])
             auto_btn.clicked.connect(self._run_auto_segment)
             popup_layout.addWidget(auto_btn)
 
-        self.antimask_btn = QPushButton("Erase")
+        delete_region_btn = QPushButton("Delete region")
+        delete_region_btn.setToolTip(tooltips["Delete region"])
+        delete_region_btn.clicked.connect(lambda: self._pick_tool("delete_region"))
+        popup_layout.addWidget(delete_region_btn)
+
+        self.antimask_btn = QPushButton("Eraser")
         self.antimask_btn.setCheckable(True)
-        self.antimask_btn.setToolTip(tooltips["Erase"])
-        self.antimask_btn.toggled.connect(self._on_antimask_toggled)
+        self.antimask_btn.setToolTip(
+            "Pixel eraser with adjustable size (same control as Brush). "
+            "Selecting another tool (Polygon, Lasso, Brush, …) switches away from Eraser."
+        )
+        self.antimask_btn.clicked.connect(self._on_eraser_clicked)
         popup_layout.addWidget(self.antimask_btn)
+
+        # Size control sits below Brush/Eraser so showing it does not shift those buttons mid-click
+        self.size_row = QWidget()
+        size_layout = QVBoxLayout(self.size_row)
+        size_layout.setContentsMargins(6, 0, 6, 4)
+        size_layout.setSpacing(2)
+        self.size_label = QLabel("Brush size (px)")
+        size_layout.addWidget(self.size_label)
+        self.brush_spin = QSpinBox()
+        self.brush_spin.setRange(1, 30)
+        self.brush_spin.setValue(self.editor.brush_width)
+        self.brush_spin.valueChanged.connect(self.editor.set_brush_width)
+        size_layout.addWidget(self.brush_spin)
+        self.size_row.hide()
+        popup_layout.addWidget(self.size_row)
 
         clear_btn = QPushButton("Clear mask")
         clear_btn.setToolTip(tooltips["Clear mask"])
@@ -268,25 +277,50 @@ class MaskInstrumentsOverlay:
             self.popup.raise_()
 
     def _update_btn_label(self):
-        if self.antimask_btn.isChecked():
-            self.btn.setText("Masking · Erase ▾")
+        if self.editor.antimask_mode:
+            self.btn.setText("Masking tools · Eraser")
         else:
-            self.btn.setText("Masking ▾")
+            self.btn.setText("Masking tools")
+
+    def _set_eraser_checked(self, enabled: bool):
+        self.antimask_btn.blockSignals(True)
+        self.antimask_btn.setChecked(enabled)
+        self.antimask_btn.blockSignals(False)
+
+    def _sync_size_controls(self):
+        """Show width spinner only while Brush is active (including Eraser + brush)."""
+        show = self.editor._tool == "brush"
+        self.size_row.setVisible(show)
+        if show:
+            if self.editor.antimask_mode:
+                self.size_label.setText("Eraser size (px)")
+            else:
+                self.size_label.setText("Brush size (px)")
+            self.brush_spin.blockSignals(True)
+            self.brush_spin.setValue(self.editor.brush_width)
+            self.brush_spin.blockSignals(False)
+        self.popup.adjustSize()
+        self.reposition()
+
+    def _clear_eraser_mode(self):
+        """Turn Eraser off in both editor state and UI."""
+        self.editor.set_antimask_mode(False)
+        self._set_eraser_checked(False)
+        self._update_btn_label()
+        self._sync_size_controls()
 
     def _back_pressed(self):
         if self.editor._tool is not None and self.editor._tool != "inspect":
             self.editor.deactivate()
-            self._update_btn_label()
+        self._clear_eraser_mode()
         self._close_popup()
 
     def _toggle_popup(self):
         if self.popup.isVisible():
             self._close_popup()
         else:
-            self.antimask_btn.setChecked(self.editor.antimask_mode)
-            self.brush_spin.setValue(self.editor.brush_width)
-            self.popup.adjustSize()
-            self.reposition()
+            self._set_eraser_checked(self.editor.antimask_mode)
+            self._sync_size_controls()
             self.popup.show()
             self.popup.raise_()
 
@@ -294,27 +328,58 @@ class MaskInstrumentsOverlay:
         self.popup.hide()
 
     def _pick_tool(self, tool: str):
+        # Switching to any draw/edit tool leaves Eraser mode
+        self.editor.set_antimask_mode(False)
+        self._set_eraser_checked(False)
         self.editor.activate_tool(tool)
         self._update_btn_label()
+        if tool == "brush":
+            # Keep menu open so brush width can be adjusted
+            self._sync_size_controls()
+            if not self.popup.isVisible():
+                self.popup.show()
+                self.popup.raise_()
+            return
+        self.size_row.hide()
         self._close_popup()
+
     def _run_auto_segment(self):
         if not AUTO_SEGMENT_UI_ENABLED:
             return
+        self._clear_eraser_mode()
         self._close_popup()
         self.ui_layout.run_auto_segmentation()
 
-    def _on_antimask_toggled(self, enabled: bool):
+    def _on_eraser_clicked(self):
+        # checkable button already flipped; drive editor from the new checked state
+        enabled = self.antimask_btn.isChecked()
         self.editor.set_antimask_mode(enabled)
         self._update_btn_label()
+        if enabled:
+            # Defer so layout / plot refresh cannot eat the click that turned Eraser on
+            QTimer.singleShot(0, self._after_eraser_enabled)
+        else:
+            # Turning Eraser off leaves brush active so size control still applies
+            if self.editor._tool != "brush":
+                self.editor.activate_tool("brush")
+            self.editor.set_antimask_mode(False)
+            self._sync_size_controls()
+
+    def _after_eraser_enabled(self):
+        if not self.editor.antimask_mode:
+            return
+        self.editor.activate_tool("brush")
+        self._set_eraser_checked(True)
+        self._sync_size_controls()
+        if not self.popup.isVisible():
+            self.popup.show()
+            self.popup.raise_()
 
     def _clear_mask(self):
         self.editor.clear_mask()
-        self.antimask_btn.blockSignals(True)
-        self.antimask_btn.setChecked(False)
-        self.antimask_btn.blockSignals(False)
-        self._update_btn_label()
+        self._clear_eraser_mode()
+        self.size_row.hide()
         self._close_popup()
-
 
 class PlotWithMaskInstruments(QWidget):
     """Wraps a FigureCanvas; repositions the overlay on resize."""

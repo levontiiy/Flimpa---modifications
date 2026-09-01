@@ -29,7 +29,7 @@ __pycache__/
 build/
 dist/
 FLIMPA (v1.0).spec
-FLIMPA.spec
+release/
 
 # Offline installers (removed from the project; ignore leftovers)
 offline/

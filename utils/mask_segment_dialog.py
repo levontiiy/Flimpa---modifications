@@ -30,7 +30,7 @@ class AutoSegmentDialog(QDialog):
         layout.addWidget(
             QLabel(
                 "Runs on the intensity image for the selected file. "
-                "You can refine the result with Brush and Erase afterwards."
+                "You can refine the result with Brush and Eraser afterwards."
             )
         )
 

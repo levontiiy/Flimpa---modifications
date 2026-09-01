@@ -72,7 +72,7 @@ class ToolBarComponents:
         import_ref.triggered.connect(self.load_irf_file)
 
         # Manual masking
-        mask_menu = menu_bar.addMenu("&Masking")
+        mask_menu = menu_bar.addMenu("Mask save")
         save_roi_mask = mask_menu.addAction("Save ROI mask (from phasor)...")
         save_roi_mask.triggered.connect(self.save_roi_mask)
         mask_menu.addSeparator()
@@ -82,7 +82,7 @@ class ToolBarComponents:
         clear_mask.triggered.connect(self.clear_manual_mask)
 
         # save data
-        file_menu = menu_bar.addMenu("&Save")
+        file_menu = menu_bar.addMenu("Save data")
         save_tau = file_menu.addAction("Save lifetime maps")
         save_tau.triggered.connect(self.save_tau_maps)
         save_gallery_tau = file_menu.addAction("Save lifetime gallery")
@@ -102,6 +102,8 @@ class ToolBarComponents:
         file_menu.addSeparator()
         export_cv = file_menu.addAction("Export lifetime values table")
         export_cv.triggered.connect(self.save_csv)
+        export_phasor_pts = file_menu.addAction("Export phasor points (G,S)...")
+        export_phasor_pts.triggered.connect(self.save_phasor_points_csv)
 
         # Colormap widgets (Intensity display Settings) and Baseline check (Lifetime maps Settings)
         self.setup_analysis_controls()
@@ -820,6 +822,50 @@ class ToolBarComponents:
         else:
             return
 
+    def save_phasor_points_csv(self):
+        """Export G/S (and row/col) after choosing which analysed file to export."""
+        if not self.shared_info.results_dict:
+            self.save_error_message("Error", "No data has been generated, please run phasor analysis first.")
+            return
+
+        files = list(self.shared_info.results_dict.keys())
+        current = self.shared_info.config.get("selected_file")
+        default_index = files.index(current) if current in files else 0
+        selected, ok = QInputDialog.getItem(
+            self.main_window,
+            "Export phasor points (G,S)",
+            "Select file to export:",
+            files,
+            default_index,
+            False,
+        )
+        if not ok or not selected:
+            return
+
+        suggested = f"{file_stem(selected)}_phasor_points.csv"
+        path, _ = QFileDialog.getSaveFileName(
+            self.main_window,
+            "Export phasor points (G,S)",
+            suggested,
+            "CSV (*.csv);;All files (*.*)",
+        )
+        if not path:
+            return
+        if not str(path).lower().endswith(".csv"):
+            path = f"{path}.csv"
+
+        try:
+            save_data.save_phasor_points_csv(path, self.shared_info.results_dict[selected], selected)
+        except Exception as e:
+            self.save_error_message("Export failed", str(e))
+            return
+
+        QMessageBox.information(
+            self.main_window,
+            "Phasor points exported",
+            f"Saved G/S points for {selected}:\n{path}",
+        )
+
     def save_roi_mask(self):
         """Save phasor ellipse selection as {name}_mask_ROI.tif."""
         selected = self.shared_info.config.get("selected_file")
@@ -866,7 +912,7 @@ class ToolBarComponents:
             self.save_error_message(
                 "Manual mask",
                 "Draw at least one region on the Intensity display "
-                "(Polygon / Rectangle / Lasso tools above the image).",
+                "(Polygon / Lasso / Brush tools above the image).",
             )
             return
 

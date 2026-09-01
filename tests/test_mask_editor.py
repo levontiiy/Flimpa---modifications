@@ -138,3 +138,76 @@ def test_disk_indices_match_brush_radius():
     assert yy.size > 0
     dist2 = (yy - 10) ** 2 + (xx - 10) ** 2
     assert np.all(dist2 <= 9)
+
+
+def test_delete_region_zeros_entire_label():
+    """Clicking a labelled pixel clears every pixel with that region id."""
+    from utils.shared_data import SharedData
+
+    shared = SharedData()
+    shared.raw_data_dict.clear()
+    shared.results_dict.clear()
+    shared.raw_data_dict["f"] = {
+        "data": np.zeros((2, 6, 6), dtype=np.float32),
+        "t_series": np.arange(2),
+        "masked_data": None,
+        "mask_arr": None,
+        "condition": "t",
+    }
+    shared.config["selected_file"] = "f"
+
+    commits = []
+
+    class _Main:
+        def __init__(self):
+            self.plotImages = None
+            self.canvas_tau = None
+            self.toolbar_components = None
+
+    editor = ManualMaskEditor(_Main())
+    editor.mask = np.zeros((6, 6), dtype=np.uint16)
+    editor.mask[1:4, 1:4] = 1
+    editor.mask[0:2, 4:6] = 2
+    editor.n_regions = 2
+    editor._commit_mask = lambda: commits.append(editor.mask.copy())
+
+    class _Event:
+        def __init__(self, x, y):
+            self.inaxes = object()
+            self.xdata = x
+            self.ydata = y
+            self.button = 1
+
+    editor._ax = type("A", (), {"figure": type("F", (), {"canvas": object()})()})()
+    # Force _event_in_axes to accept the event
+    editor._event_in_axes = lambda event: True
+
+    editor._on_delete_region_press(_Event(2.0, 2.0))
+
+    assert np.all(editor.mask[1:4, 1:4] == 0)
+    assert np.all(editor.mask[0:2, 4:6] == 2)
+    assert editor.n_regions == 2
+    assert len(commits) == 1
+
+    editor._on_delete_region_press(_Event(5.0, 0.0))
+    assert np.all(editor.mask == 0)
+    assert editor.n_regions == 0
+    assert len(commits) == 2
+
+
+def test_antimask_brush_clears_pixels_under_shape():
+    """Eraser (antimask) mode zeros brush-covered pixels without removing whole labels."""
+    editor = ManualMaskEditor.__new__(ManualMaskEditor)
+    editor.mask = np.zeros((8, 8), dtype=np.uint16)
+    editor.mask[2:6, 2:6] = 1
+    editor.n_regions = 1
+    editor.antimask_mode = True
+    editor.brush_width = 2
+    editor._stroke_region = 0
+    editor._stroke_dirty = False
+
+    editor._paint_at(3.0, 3.0)
+
+    assert editor.mask[3, 3] == 0
+    assert editor.mask[5, 5] == 1
+    assert editor._stroke_dirty is True

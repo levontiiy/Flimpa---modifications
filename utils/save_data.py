@@ -341,3 +341,33 @@ def save_df_csv(output_dir, df_stats):
         os.makedirs(output_dir)
     df_export = df_stats.drop(columns=['M_mean', 'phi_mean', 'average_mean'], errors='ignore')
     df_export.to_csv(os.path.join(output_dir, "lifetime_values.csv"))
+
+
+def save_phasor_points_csv(path, results_entry, filename: str | None = None):
+    """
+    Export per-pixel G/S phasor coordinates for one analysed file.
+
+    Keeps the same non-zero filter as the phasor scatter plot. Columns: G, S, row, col.
+    """
+    g = np.asarray(results_entry["g"], dtype=np.float64).ravel()
+    s = np.asarray(results_entry["s"], dtype=np.float64).ravel()
+    img_shape = results_entry.get("img_shape")
+    if img_shape is None or len(img_shape) < 3:
+        raise ValueError("Missing img_shape for phasor point export.")
+    ny, nx = int(img_shape[1]), int(img_shape[2])
+    if g.size != ny * nx or s.size != ny * nx:
+        raise ValueError("G/S length does not match image shape.")
+
+    keep = (g != 0) & (s != 0)
+    idx = np.flatnonzero(keep)
+    rows = idx // nx
+    cols = idx % nx
+
+    parent = os.path.dirname(path)
+    if parent and not os.path.exists(parent):
+        os.makedirs(parent)
+
+    header = "G,S,row,col"
+    data = np.column_stack((g[idx], s[idx], rows, cols))
+    np.savetxt(path, data, delimiter=",", header=header, comments="", fmt="%.10g")
+    return path

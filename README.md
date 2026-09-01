@@ -6,7 +6,7 @@
 
 **FLIMPA** is an open-source app for phasor-plot analysis of raw Time-Correlated Single Photon Counting (TCSPC) Fluorescence Lifetime Imaging Microscopy (FLIM) data.
 
-This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It adds in-app masking, FRET maps, baseline-check decay curves, colormaps, and related UI. Run it from source (the original Windows `.exe` does not include these extras).
+This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2), released here as **FLIMPA 1.5.0**. It adds in-app masking, FRET maps, baseline-check decay curves, colormaps, and related UI. Run it from source (the original Windows `.exe` does not include these extras).
 
 > **FLIMPA: A Versatile Software for Fluorescence Lifetime Imaging Microscopy Phasor Analysis**, published in *Analytical Chemistry*  
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
@@ -26,7 +26,7 @@ This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaK
 - Gallery plots of fluorescence lifetime and intensity maps
 - Violin plot analysis
 - Table of mean fluorescence lifetime values per image
-- Manual masking on intensity / lifetime images (polygon, rectangle, lasso, brush) and mask import/export
+- Manual masking on intensity / lifetime images (polygon, lasso, brush) and mask import/export
 - FRET efficiency maps (`E = 1 − τ / τ_D`)
 - Baseline check: click a pixel on the lifetime map to inspect the decay curve
 - Lifetime colormap presets and custom colormap loading
@@ -37,7 +37,11 @@ This repository is a modified build of [FLIMPA v1.4.2](https://github.com/SofiaK
 
 Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux. You can run it from a terminal or from an IDE (PyCharm, VS Code, Cursor).
 
-There is no separate installer for this fork. The original Windows `.exe` (without these extra features) is still at [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
+There is no Windows `.exe` for this fork yet (build on Windows with `scripts/build_release.sh`). **macOS:** download **`FLIMPA.v1.5.0.dmg`** from [Releases v1.5.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0). The original Windows `.exe` (without these extra features) is still at [FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
+
+To build standalone apps yourself, use **PyInstaller** (already listed in `requirements.txt`). Run `bash scripts/build_release.sh 1.5.0` from the project root. Build on each target OS — a Windows `.exe` must be built on Windows; a macOS `.app` / `.dmg` must be built on macOS.
+
+**Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` are gitignored.
 
 ## 1. Download the code
 
@@ -120,7 +124,7 @@ For the original FLIMPA workflow, also see the online manuals ([PowerPoint](http
 
 The layout is: parameters and **Run Phasor Plot Analysis** on the left, the phasor plot under that, image tabs in the centre, and the file list on the right. After analysis, extra tabs appear for lifetime maps, galleries, violin plots, and the lifetime table.
 
-Menus: **Load data**, **Reference**, **Masking**, **Save**.
+Menus: **Load data**, **Reference**, **Mask save**, **Save data**.
 
 *Video: general features — overview of the app after data are loaded*
 
@@ -192,7 +196,7 @@ Always available. Settings at the bottom of the tab:
 - **Colormap** — lifetime / phasor colour scale (Rainbow, Viridis, Plasma, …, or Custom)
 - **Load custom...** — CSV/TXT (R,G,B rows, low → high lifetime) or a horizontal colour-strip image
 
-On intensity, lifetime, and FRET images: **Masking ▾** is top-left; pan / reset / zoom are top-right.
+On intensity, lifetime, and FRET images: **Masking tools** is top-left; pan / reset / zoom are top-right.
 
 ## Lifetime maps
 
@@ -241,15 +245,16 @@ After analysis:
 
 ## Saving data
 
-**Save** menu:
+**Save data** menu:
 
 - **Save lifetime maps** — `.png` and raw `.tif`
 - **Save lifetime gallery**
 - **Save intensity images** / **Save intensity gallery**
 - **Save transparent phasor plot** / **Save transparent violin plot**
-- **Export lifetime values table** — `.csv`
+- **Export lifetime values table** — `.csv` of mean lifetime per image
+- **Export phasor points (G,S)...** — choose an analysed file, then save a `.csv` of G, S, row, col (non-zero pixels only)
 
-Masks are saved from the **Masking** menu, not **Save**.
+Masks are saved from the **Mask save** menu, not **Save data**.
 
 ---
 
@@ -259,8 +264,8 @@ Three ways to restrict which pixels enter phasor / lifetime analysis:
 
 | Method | Where you define it | Saved as | Applied when |
 |--------|---------------------|----------|--------------|
-| **Manual mask** | Intensity or Lifetime map → **Masking ▾** | `{name}_mask_polygon.tif` | Immediately in the session; on import if the file is on disk |
-| **Phasor ROI mask** | Phasor plot → **ROI** ellipse → **Masking → Save ROI mask** | `{name}_mask_ROI.tif` | After you save |
+| **Manual mask** | Intensity or Lifetime map → **Masking tools** | `{name}_mask_polygon.tif` | Immediately in the session; on import if the file is on disk |
+| **Phasor ROI mask** | Phasor plot → **ROI** ellipse → **Mask save → Save ROI mask** | `{name}_mask_ROI.tif` | After you save |
 | **Photon threshold** | Parameters panel (min/max photons) | Not saved as a mask | Always during analysis |
 
 Manual masks are **labelled uint16 TIFF**: `0` = outside, `1`, `2`, `3`… = separate regions.
@@ -271,27 +276,27 @@ Photon min/max thresholds are applied separately and shown as a teal overlay on 
 
 ## Manual mask (polygon and other drawing tools)
 
-On **Intensity display** and **Lifetime maps**, **Masking ▾** is at the top-left of the image.
+On **Intensity display** and **Lifetime maps**, **Masking tools** is at the top-left of the image.
 
-1. Click **Masking ▾**.
-2. Choose **Polygon**, **Rectangle**, **Lasso**, or **Brush**.
+1. Click **Masking tools**.
+2. Choose **Polygon**, **Lasso**, or **Brush**.
 3. Draw on the image. **Back** closes the menu without choosing a tool.
 4. **Clear mask** removes all regions for this file **and** stops the drawing tool.
 
-When **Erase** is on, the button reads **Masking · Erase ▾**. Drawing then sets pixels to `0` instead of adding a region.
+When **Eraser** is on, the button reads **Masking tools · Eraser** and **Eraser size (px)** appears (same 1–30 range as Brush). Choosing **Polygon**, **Lasso**, **Brush**, or **Delete region** switches away from Eraser automatically.
 
 | Tool | Use |
 |------|-----|
 | **Polygon** | Click vertices; close on the first point or **Enter**; **Esc** cancels |
-| **Rectangle** | Drag a box |
 | **Lasso** | Freehand outline |
-| **Brush** | Paint with a circular brush; set **Brush size (px)** in the menu (1–30) |
-| **Erase** | Toggle: tools **remove** mask inside the drawn area |
+| **Brush** | Paint with a circular brush; after selecting Brush, set **Brush size (px)** (1–30) |
+| **Delete region** | Click a labelled region to remove that whole region |
+| **Eraser** | Paint to remove mask pixels; set **Eraser size (px)**. Switched off when another tool is chosen |
 | **Clear mask** | Remove all regions and exit masking |
 
 **Brush:** a stroke on empty background creates a **new** region label. Starting on an existing region **extends that label**. The mask updates when you release the mouse.
 
-Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Plot Analysis**.
+Typical workflow: **draw mask → Mask save → Save manual mask → Run Phasor Plot Analysis**.
 
 *Video: polygon masking — drawing a manual mask on the image*
 
@@ -301,7 +306,7 @@ Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Pl
 
 1. After analysis, click **ROI** above the phasor plot.
 2. Drag an ellipse around the phasor cloud you want to keep. The lifetime map dims pixels outside that ellipse (preview only).
-3. **Masking → Save ROI mask (from phasor)...** writes `{stem}_mask_ROI.tif` and applies it to analysis.
+3. **Mask save → Save ROI mask (from phasor)...** writes `{stem}_mask_ROI.tif` and applies it to analysis.
 4. Toggle **ROI** again to clear the ellipse preview.
 
 *Video: ROI masking — ellipse on the phasor plot, then save*
@@ -310,13 +315,21 @@ Typical workflow: **draw mask → Masking → Save manual mask → Run Phasor Pl
 
 ## Saving and clearing masks
 
-**Masking** menu (top menu bar):
+**Mask save** menu (top menu bar):
 
 | Action | Output |
 |--------|--------|
 | **Save manual mask (polygon)...** | Suggested `{stem}_mask_polygon.tif` |
 | **Save ROI mask (from phasor)...** | Suggested `{stem}_mask_ROI.tif` |
 | **Clear manual mask for selected file** | Clears in memory only (does not delete files on disk) and exits the drawing tool |
+
+Saving applies the mask in the **current session**. FLIMPA does **not** automatically reload mask files from disk when you open the app again or import raw data without masks.
+
+**To see a saved mask again** (overlay on intensity / lifetime maps, or use in analysis), re-import the sample with its mask:
+
+**Load data → Import raw data with manual masks** (or the “by condition” variant), select the same raw file(s), then point to the folder or TIFF(s) where you saved `{stem}_mask_polygon.tif` or `{stem}_mask_ROI.tif`.
+
+Keep the mask next to the raw file (or in one folder) and use the naming rules in [Importing masks](#importing-masks) below so FLIMPA pairs them correctly.
 
 ## Importing masks
 

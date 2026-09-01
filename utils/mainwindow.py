@@ -209,7 +209,17 @@ class MainWindow(QMainWindow):
 
             violin_plot_tab.setLayout(self.violin_plot_layout)
             self.ui_layout.tabs_widget.addTab(violin_plot_tab, "Violin plots")
-    
+
+        # Keep FRET as the rightmost tab once analysis tabs exist
+        tabs = self.ui_layout.tabs_widget
+        fret_index = None
+        for i in range(tabs.count()):
+            if tabs.tabText(i) == "FRET":
+                fret_index = i
+                break
+        if fret_index is not None and fret_index != tabs.count() - 1:
+            tabs.tabBar().moveTab(fret_index, tabs.count() - 1)
+
     def onTabChanged(self, index):
         # Save the name of the active tab
         current_tab_name = self.ui_layout.tabs_widget.tabText(index)
