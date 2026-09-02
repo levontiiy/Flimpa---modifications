@@ -46,11 +46,42 @@ This repository is **FLIMPA 1.5.0** — a modified build based on [upstream FLIM
 
 # Installation — FLIMPA 1.5.0
 
-**Download:** [FLIMPA.v1.5.0.dmg](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0) (macOS, Apple Silicon build) — or run from source below.
+## Install from release
 
-Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux. You can run it from a terminal or from an IDE (PyCharm, VS Code, Cursor).
+### macOS
 
-There is no Windows `.exe` for this fork yet (build on Windows with `FLIMPA.spec` / PyInstaller). Upstream **FLIMPA 1.4.2** Windows `.exe` (without 1.5.0 features) is at [SofiaKapsiani/FLIMPA](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2).
+Download **`FLIMPA.v1.5.0.dmg`** from [Releases v1.5.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0).
+
+1. **Open the disk image** — double-click `FLIMPA.v1.5.0.dmg`. A Finder window titled **FLIMPA 1.5.0** opens (this is the installer disk, not the app itself).
+2. **Install** — drag **FLIMPA** to **Applications**.
+3. **Eject** the disk image (right-click the **FLIMPA 1.5.0** volume → **Eject**).
+4. **Launch** — open **Applications → FLIMPA** (or use Spotlight).
+
+**Gatekeeper (unsigned build):** macOS may block the first launch and show a warning that the app is from an unidentified developer or “damaged”. This is expected for an unsigned release.
+
+5. If FLIMPA does not open, go to ** → System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the FLIMPA message.
+6. Launch **FLIMPA** again from Applications and confirm **Open**.
+
+Alternatively, **right-click** `FLIMPA` in Applications → **Open** → **Open** (works the first time without using System Settings).
+
+If you still see “damaged”, run in Terminal:
+
+```bash
+xattr -cr /Applications/FLIMPA.app
+codesign --force --deep -s - /Applications/FLIMPA.app
+```
+
+Then open FLIMPA again.
+
+### Windows
+
+*(Not yet available — Windows `.exe` release coming soon. Use [Install from source](#install-from-source) below, or upstream [FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2) without 1.5.0 features.)*
+
+---
+
+## Install from source
+
+Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux.
 
 To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 1.5.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --clean --noconfirm FLIMPA.spec` and zip `dist/FLIMPA/`.
 
