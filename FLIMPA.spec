@@ -1,4 +1,4 @@
-# PyInstaller spec for FLIMPA 1.5.0 (macOS .app / Windows .exe)
+# PyInstaller spec for FLIMPA 2.0.0 (macOS .app / Windows .exe)
 # Usage: pyinstaller --clean --noconfirm FLIMPA.spec
 #
 # Windows → single-file dist/FLIMPA.exe
@@ -105,5 +105,5 @@ else:
             name="FLIMPA.app",
             icon=str(ROOT / "icon" / "icon_f.ico"),
             bundle_identifier="org.flimpa.app",
-            version="1.5.0",
+            version="2.0.0",
         )

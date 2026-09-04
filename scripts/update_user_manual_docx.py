@@ -1,4 +1,4 @@
-"""Update User Manual FLIMPA v1.5.0.docx with new TOC and 1.5.0 sections."""
+"""Update User Manual FLIMPA v2.0.0.docx with new TOC and 2.0.0 sections."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from docx import Document
 from docx.enum.text import WD_BREAK
 from docx.shared import Pt
 
-DOC_PATH = Path("/Users/levgerasimov/Downloads/User Manual FLIMPA v1.5.0.docx")
-BACKUP_PATH = DOC_PATH.with_name("User Manual FLIMPA v1.5.0_backup.docx")
+DOC_PATH = Path("/Users/levgerasimov/Downloads/User Manual FLIMPA v2.0.0.docx")
+BACKUP_PATH = DOC_PATH.with_name("User Manual FLIMPA v2.0.0_backup.docx")
 
 TOC_LINES = [
     "1. Installation and getting started",
@@ -56,7 +56,7 @@ TOC_LINES = [
     "    10.2 Export phasor points (G, S)",
     "11. Understanding the outputs (G, S, M, phi, row, col)",
     "12. Troubleshooting and FAQ",
-    "Appendix A. Changes from FLIMPA 1.4.2 to 1.5.0",
+    "Appendix A. Changes from FLIMPA 1.4.2 to 2.0.0",
 ]
 
 GETTING_STARTED = {
@@ -69,7 +69,7 @@ GETTING_STARTED = {
         ),
         (
             "1.2 Installing from release — macOS (.dmg)",
-            "Download FLIMPA.v1.5.0.dmg from GitHub Releases (levontiiy/Flimpa---modifications). "
+            "Download FLIMPA.v2.0.0.dmg from GitHub Releases (levontiiy/Flimpa---modifications). "
             "Open the disk image and drag FLIMPA to Applications. "
             "If macOS blocks the app on first launch (unsigned build), right-click the app and choose Open.",
         ),
@@ -183,12 +183,12 @@ def _update_saving_section(doc: Document) -> None:
 
 
 def _add_new_sections(doc: Document) -> None:
-    if any(p.text.strip().startswith("5. Phasor plot (1.5.0 updates)") for p in doc.paragraphs):
+    if any(p.text.strip().startswith("5. Phasor plot (2.0.0 updates)") for p in doc.paragraphs):
         return
 
     sections = [
         (
-            "5. Phasor plot (1.5.0 updates)",
+            "5. Phasor plot (2.0.0 updates)",
             "[Add: G/S axis labels, Layers list on gallery phasor plots, scatter/histogram/contour, Individual vs Condition.]",
         ),
         (
@@ -212,7 +212,7 @@ def _add_new_sections(doc: Document) -> None:
             "[Add: masks not visible until re-import, macOS Gatekeeper, baseline correction warnings.]",
         ),
         (
-            "Appendix A. Changes from FLIMPA 1.4.2 to 1.5.0",
+            "Appendix A. Changes from FLIMPA 1.4.2 to 2.0.0",
             "[Summary of new features in this fork.]",
         ),
     ]

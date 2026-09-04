@@ -2,17 +2,17 @@
   <img src="https://github.com/user-attachments/assets/73dee1af-b5dc-4211-b0ce-ba623fe0bdad" alt="icon_filimpa" width="70%">
 </div>
 
-# FLIMPA 1.5.0
+# FLIMPA 2.0.0
 
 **FLIMPA** is an open-source app for phasor-plot analysis of raw Time-Correlated Single Photon Counting (TCSPC) Fluorescence Lifetime Imaging Microscopy (FLIM) data.
 
-This repository is **FLIMPA 1.5.0** — a modified build based on [upstream FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It keeps the core phasor workflow and adds in-app masking, FRET maps, baseline-check decay curves, colormaps, export options, and UI updates documented below.
+This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It keeps the core phasor workflow and adds in-app masking, FRET maps, baseline-check decay curves, colormaps, export options, and UI updates documented below.
 
 > **FLIMPA: A Versatile Software for Fluorescence Lifetime Imaging Microscopy Phasor Analysis**, published in *Analytical Chemistry*  
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
 > [Molecular Neuroscience Group](https://www.ceb-mng.org/) and [Laser Analytics Group](https://laser.ceb.cam.ac.uk/) (University of Cambridge)
 
-[[FLIMPA 1.5.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual (PowerPoint)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
+[[FLIMPA 2.0.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual (PowerPoint)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
 
 ## Features
 
@@ -30,7 +30,7 @@ This repository is **FLIMPA 1.5.0** — a modified build based on [upstream FLIM
 - Table of mean fluorescence lifetime values per image (group by condition or sample)
 - Import `.sdt`, `.ptu`, and `.tif` stacks; reference correction; optional IRF overlay
 
-### Added in FLIMPA 1.5.0
+### Added in FLIMPA 2.0.0
 
 - **Manual masking** on intensity / lifetime / FRET images — polygon, lasso, brush, delete region, eraser (with adjustable brush/eraser size 1–30 px); mask import/export as labelled uint16 TIFF
 - **Mask save** menu — save manual (polygon) or phasor ROI masks; clear mask for selected file
@@ -40,21 +40,21 @@ This repository is **FLIMPA 1.5.0** — a modified build based on [upstream FLIM
 - **Phasor plot** — **G** and **S** axis labels; **Layers** list on gallery phasor plots (show/hide files, reorder)
 - **Image navigation** — pan, zoom, and reset on intensity, lifetime, and FRET views
 - **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
-- **macOS app** — `FLIMPA.v1.5.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0); PyInstaller build scripts for macOS and Windows
+- **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0); PyInstaller build scripts for macOS and Windows
 
 ---
 
-# Installation — FLIMPA 1.5.0
+# Installation — FLIMPA 2.0.0
 
 ## Install from release
 
 ### macOS
 
-Download **`FLIMPA.v1.5.0.dmg`** from [Releases v1.5.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v1.5.0).
+Download **`FLIMPA.v2.0.0.dmg`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
 
-1. **Open the disk image** — double-click `FLIMPA.v1.5.0.dmg`. A Finder window titled **FLIMPA 1.5.0** opens (this is the installer disk, not the app itself).
+1. **Open the disk image** — double-click `FLIMPA.v2.0.0.dmg`. A Finder window titled **FLIMPA 2.0.0** opens (this is the installer disk, not the app itself).
 2. **Install** — drag **FLIMPA** to **Applications**.
-3. **Eject** the disk image (right-click the **FLIMPA 1.5.0** volume → **Eject**).
+3. **Eject** the disk image (right-click the **FLIMPA 2.0.0** volume → **Eject**).
 4. **Launch** — open **Applications → FLIMPA** (or use Spotlight).
 
 **Gatekeeper (unsigned build):** macOS may block the first launch and show a warning that the app is from an unidentified developer or “damaged”. This is expected for an unsigned release.
@@ -75,7 +75,7 @@ Then open FLIMPA again.
 
 ### Windows
 
-*(Not yet available — Windows `.exe` release coming soon. Use [Install from source](#install-from-source) below, or upstream [FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2) without 1.5.0 features.)*
+*(Not yet available — Windows `.exe` release coming soon. Use [Install from source](#install-from-source) below, or upstream [FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2) without 2.0.0 features.)*
 
 ---
 
@@ -83,7 +83,7 @@ Then open FLIMPA again.
 
 Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux.
 
-To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 1.5.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --clean --noconfirm FLIMPA.spec` and zip `dist/FLIMPA/`.
+To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 2.0.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --clean --noconfirm FLIMPA.spec` and zip `dist/FLIMPA/`.
 
 **Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` are gitignored.
 

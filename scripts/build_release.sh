@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-VERSION="${1:-1.5.0}"
+VERSION="${1:-2.0.0}"
 VENV_PY="${ROOT}/.venv/bin/python"
 
 if [[ ! -x "$VENV_PY" ]]; then
