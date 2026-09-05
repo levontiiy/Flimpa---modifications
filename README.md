@@ -55,7 +55,7 @@ Download builds from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---mod
 
 | Platform | File |
 |----------|------|
-| macOS | [`FLIMPA.v2.0.0.dmg`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA.v2.0.0.dmg) |
+| macOS | [`FLIMPA.v2.0.0.dmg`](https://github.com/levontiiy/Flimpa---modifications/releases/download/2.0.0/FLIMPA.v2.0.0.dmg) |
 | Windows | [`FLIMPA_v2.0.0.exe`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA_v2.0.0.exe) |
 
 **User manual (in the repository, not a release asset):** [FLIMPA_2.0.0_User_Manual.docx](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx)
