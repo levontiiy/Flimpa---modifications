@@ -40,7 +40,7 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 - **Phasor plot** — **G** and **S** axis labels; **Layers** list on gallery phasor plots (show/hide files, reorder)
 - **Image navigation** — pan, zoom, and reset on intensity, lifetime, and FRET views
 - **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
-- **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
+- **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/2.0.0)
 - **Windows app** — single-file `FLIMPA_v2.0.0.exe` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
 - **User manual** — [Word](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx) and [PowerPoint](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual_Presentation.pptx) (in this repo under `docs/`)
 - PyInstaller build scripts for macOS (`.dmg`) and Windows (single `.exe`)
