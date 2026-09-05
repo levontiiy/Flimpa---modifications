@@ -12,7 +12,7 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
 > [Molecular Neuroscience Group](https://www.ceb-mng.org/) and [Laser Analytics Group](https://laser.ceb.cam.ac.uk/) (University of Cambridge)
 
-[[FLIMPA 2.0.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual (PowerPoint)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
+[[FLIMPA 2.0.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual 2.0.0 (Word)](docs/FLIMPA_2.0.0_User_Manual.docx)] [[user manual (PowerPoint, upstream)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF, upstream)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
 
 ## Features
 
@@ -40,7 +40,10 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 - **Phasor plot** — **G** and **S** axis labels; **Layers** list on gallery phasor plots (show/hide files, reorder)
 - **Image navigation** — pan, zoom, and reset on intensity, lifetime, and FRET views
 - **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
-- **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0); PyInstaller build scripts for macOS and Windows
+- **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
+- **Windows app** — single-file `FLIMPA_v2.0.0.exe` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
+- **User manual** — [FLIMPA 2.0.0 User Manual (Word)](docs/FLIMPA_2.0.0_User_Manual.docx)
+- PyInstaller build scripts for macOS (`.dmg`) and Windows (single `.exe`)
 
 ---
 
@@ -48,19 +51,26 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 
 ## Install from release
 
+Download builds from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0):
+
+| Platform | File |
+|----------|------|
+| macOS | [`FLIMPA.v2.0.0.dmg`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA.v2.0.0.dmg) |
+| Windows | [`FLIMPA_v2.0.0.exe`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA_v2.0.0.exe) |
+| Manual | [`FLIMPA_2.0.0_User_Manual.docx`](docs/FLIMPA_2.0.0_User_Manual.docx) |
+
 ### macOS
 
-Download **`FLIMPA.v2.0.0.dmg`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
-
-1. **Open the disk image** — double-click `FLIMPA.v2.0.0.dmg`. A Finder window titled **FLIMPA 2.0.0** opens (this is the installer disk, not the app itself).
-2. **Install** — drag **FLIMPA** to **Applications**.
-3. **Eject** the disk image (right-click the **FLIMPA 2.0.0** volume → **Eject**).
-4. **Launch** — open **Applications → FLIMPA** (or use Spotlight).
+1. **Download** **`FLIMPA.v2.0.0.dmg`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
+2. **Open the disk image** — double-click `FLIMPA.v2.0.0.dmg`. A Finder window titled **FLIMPA 2.0.0** opens (this is the installer disk, not the app itself).
+3. **Install** — drag **FLIMPA** to **Applications**.
+4. **Eject** the disk image (right-click the **FLIMPA 2.0.0** volume → **Eject**).
+5. **Launch** — open **Applications → FLIMPA** (or use Spotlight).
 
 **Gatekeeper (unsigned build):** macOS may block the first launch and show a warning that the app is from an unidentified developer or “damaged”. This is expected for an unsigned release.
 
-5. If FLIMPA does not open, go to ** → System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the FLIMPA message.
-6. Launch **FLIMPA** again from Applications and confirm **Open**.
+6. If FLIMPA does not open, go to ** → System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the FLIMPA message.
+7. Launch **FLIMPA** again from Applications and confirm **Open**.
 
 Alternatively, **right-click** `FLIMPA` in Applications → **Open** → **Open** (works the first time without using System Settings).
 
@@ -75,7 +85,11 @@ Then open FLIMPA again.
 
 ### Windows
 
-*(Not yet available — Windows `.exe` release coming soon. Use [Install from source](#install-from-source) below, or upstream [FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2) without 2.0.0 features.)*
+1. **Download** **`FLIMPA_v2.0.0.exe`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
+2. **Run** the file (double-click). No separate installer folder is required — this is a single-file build.
+3. On first launch, Windows SmartScreen may warn that the app is unrecognized. Click **More info** → **Run anyway** (unsigned release).
+
+If antivirus quarantines the `.exe`, restore it or add an exception — PyInstaller apps are often flagged on first download.
 
 ---
 
@@ -83,9 +97,9 @@ Then open FLIMPA again.
 
 Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages). Works on macOS, Windows, and Linux.
 
-To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 2.0.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --clean --noconfirm FLIMPA.spec` and zip `dist/FLIMPA/`.
+To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 2.0.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --noconfirm FLIMPA.spec` to produce a single-file `dist\FLIMPA.exe`.
 
-**Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` are gitignored.
+**Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` / `*.exe` are gitignored. The [user manual](docs/FLIMPA_2.0.0_User_Manual.docx) lives in `docs/` and can also be attached to the release.
 
 ## 1. Download the code
 
