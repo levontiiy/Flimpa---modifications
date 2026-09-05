@@ -62,7 +62,7 @@ Download builds from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---mod
 
 ### macOS
 
-1. **Download** **`FLIMPA.v2.0.0.dmg`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
+1. **Download** **`FLIMPA.v2.0.0.dmg`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/2.0.0).
 2. **Open the disk image** — double-click `FLIMPA.v2.0.0.dmg`. A Finder window titled **FLIMPA 2.0.0** opens (this is the installer disk, not the app itself).
 3. **Install** — drag **FLIMPA** to **Applications**.
 4. **Eject** the disk image (right-click the **FLIMPA 2.0.0** volume → **Eject**).
