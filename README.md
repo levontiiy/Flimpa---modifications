@@ -12,7 +12,7 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
 > [Molecular Neuroscience Group](https://www.ceb-mng.org/) and [Laser Analytics Group](https://laser.ceb.cam.ac.uk/) (University of Cambridge)
 
-[[FLIMPA 2.0.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual 2.0.0 (Word)](docs/FLIMPA_2.0.0_User_Manual.docx)] [[user manual (PowerPoint, upstream)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF, upstream)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
+[[FLIMPA 2.0.0 (this fork)](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)] [[upstream FLIMPA 1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2)] [[paper](https://pubs.acs.org/doi/10.1021/acs.analchem.5c00495)] [[user manual 2.0.0 (Word)](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx)] [[user manual (PowerPoint, upstream)](https://docs.google.com/presentation/d/1rq5PuOyjQz3sg_ERyIjXMgyj1betNweTIrD1v64-u7o/edit?usp=sharing)] [[user manual (PDF, upstream)](https://pubs.acs.org/doi/suppl/10.1021/acs.analchem.5c00495/suppl_file/ac5c00495_si_002.pdf)] [[citation](#citation)]
 
 ## Features
 
@@ -42,7 +42,7 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 - **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
 - **macOS app** — `FLIMPA.v2.0.0.dmg` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
 - **Windows app** — single-file `FLIMPA_v2.0.0.exe` via [Releases](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0)
-- **User manual** — [FLIMPA 2.0.0 User Manual (Word)](docs/FLIMPA_2.0.0_User_Manual.docx)
+- **User manual** — [FLIMPA 2.0.0 User Manual (Word)](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx) (in this repo under `docs/`)
 - PyInstaller build scripts for macOS (`.dmg`) and Windows (single `.exe`)
 
 ---
@@ -57,7 +57,8 @@ Download builds from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---mod
 |----------|------|
 | macOS | [`FLIMPA.v2.0.0.dmg`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA.v2.0.0.dmg) |
 | Windows | [`FLIMPA_v2.0.0.exe`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA_v2.0.0.exe) |
-| Manual | [`FLIMPA_2.0.0_User_Manual.docx`](docs/FLIMPA_2.0.0_User_Manual.docx) |
+
+**User manual (in the repository, not a release asset):** [FLIMPA_2.0.0_User_Manual.docx](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx)
 
 ### macOS
 
@@ -99,7 +100,7 @@ Needs **Python 3.11 or newer**, **pip**, and internet once (to download packages
 
 To build standalone apps yourself, use **PyInstaller** (listed in `requirements.txt`). Run `bash scripts/build_release.sh 2.0.0` from the project root (macOS → `.dmg`). On Windows, run `pyinstaller --noconfirm FLIMPA.spec` to produce a single-file `dist\FLIMPA.exe`.
 
-**Publishing:** attach built files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit large binaries to the repo — `release/`, `dist/`, and `*.dmg` / `*.exe` are gitignored. The [user manual](docs/FLIMPA_2.0.0_User_Manual.docx) lives in `docs/` and can also be attached to the release.
+**Publishing:** attach built `.dmg` / `.exe` files to a [GitHub Release](https://github.com/levontiiy/Flimpa---modifications/releases) (same pattern as upstream FLIMPA). Do not commit those large binaries to the repo — `release/`, `dist/`, and `*.dmg` / `*.exe` are gitignored. The [user manual](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual.docx) is kept in `docs/` in git.
 
 ## 1. Download the code
 
