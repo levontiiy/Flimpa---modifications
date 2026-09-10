@@ -237,7 +237,7 @@ Set these parameters (left panel), then click **Run Phasor Plot Analysis**:
 | **Baseline correction** | `True` subtracts a constant offset estimated from the earliest delay channels (read baseline correction) |
 | **% time channels (baseline corr.)** | to account for detector delays (default 3.5%) |
 
-**Warning:** if real fluorescence is already present in the earliest time channels (for example after heavy `.ptu` time binning), baseline correction will subtract signal as well as noise. See slide 11 of the [PowerPoint user manual](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual_Presentation.pptx).
+**Warning:** if real fluorescence is already present in the earliest time channels (for example after heavy `.ptu` time binning), baseline correction will subtract signal as well as noise. See slide 10 of the [PowerPoint user manual](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual_Presentation.pptx).
 
 ## Phasor plot
 
@@ -275,7 +275,7 @@ After analysis, **Lifetime maps** Settings:
 2. In that tab’s Settings, turn on **Baseline check**.
 3. Click a pixel on the lifetime image.
 
-The **FLIMPA — Baseline check** window shows photon counts vs delay time for that location. It uses **Pixel block size** (the same N×N neighbourhood as analysis).
+The **FLIMPA — Baseline check** window shows photon counts vs delay time for that location. It uses **Pixel block size** (the same N×N neighbourhood as during the analysis).
 
 In the window:
 
