@@ -6,7 +6,9 @@
 
 **FLIMPA** is an open-source app for phasor-plot analysis of raw Time-Correlated Single Photon Counting (TCSPC) Fluorescence Lifetime Imaging Microscopy (FLIM) data.
 
-This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It keeps the core phasor workflow and adds in-app masking, FRET maps, baseline-check decay curves, colormaps, export options, and UI updates documented below.
+This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIMPA v1.4.2](https://github.com/SofiaKapsiani/FLIMPA/releases/tag/v1.4.2). It keeps the core phasor workflow and adds in-app masking, FRET maps, baseline-check decay curves, colour maps, export options, and UI updates documented below.
+
+This version was written post-publication by Lev Gerasimov as part of a summer project with the Molecular Neuroscience Group at the University of Cambridge. To run the software, please download the corresponding [`.exe`](https://github.com/levontiiy/Flimpa---modifications/releases/download/v2.0.0/FLIMPA_v2.0.0.exe) file for Windows or the [`.dmg`](https://github.com/levontiiy/Flimpa---modifications/releases/download/2.0.0/FLIMPA.v2.0.0.dmg) file for Mac. Please cite the following reference if you used this software in your research:
 
 > **FLIMPA: A Versatile Software for Fluorescence Lifetime Imaging Microscopy Phasor Analysis**, published in *Analytical Chemistry*  
 > Sofia Kapsiani, Nino F Läubli, Edward N. Ward, Mona Shehata, Clemens F. Kaminski, Gabriele S. Kaminski Schierle  
@@ -36,7 +38,7 @@ This repository is **FLIMPA 2.0.0** — a modified build based on [upstream FLIM
 - **Mask save** menu — save manual (polygon) or phasor ROI masks; clear mask for selected file
 - **FRET efficiency maps** — `E = 1 − τ / τ_D`; FRET tab appears after analysis (rightmost tab)
 - **Baseline check** — click a pixel on the lifetime map to inspect the decay curve (log scale, map τ curve, IRF overlay, t₀ crop)
-- **Lifetime colormap** presets and custom colormap loading (CSV/TXT or colour-strip image)
+- **Lifetime colour map** presets and custom colour map loading (CSV/TXT or colour-strip image)
 - **Phasor plot** — **G** and **S** axis labels; **Layers** list on gallery phasor plots (show/hide files, reorder)
 - **Image navigation** — pan, zoom, and reset on intensity, lifetime, and FRET views
 - **Save data** menu — export lifetime maps, galleries, phasor/violin plots, lifetime table CSV, and **Export phasor points (G,S)...** (choose file from list → CSV with G, S, row, col for non-zero pixels)
@@ -88,7 +90,7 @@ Then open FLIMPA again.
 
 1. **Download** **`FLIMPA_v2.0.0.exe`** from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0).
 2. **Run** the file (double-click). No separate installer folder is required — this is a single-file build.
-3. On first launch, Windows SmartScreen may warn that the app is unrecognized. Click **More info** → **Run anyway** (unsigned release).
+3. On first launch, Windows SmartScreen may warn that the app is unrecognised. Click **More info** → **Run anyway** (unsigned release).
 
 If antivirus quarantines the `.exe`, restore it or add an exception — PyInstaller apps are often flagged on first download.
 
@@ -253,7 +255,7 @@ On **Gallery (tau)**, the **Layers** list (right of the phasor) shows/hides file
 
 Always available. Settings at the bottom of the tab:
 
-- **Colormap** — lifetime / phasor colour scale (Rainbow, Viridis, Plasma, …, or Custom)
+- **Colour map** — lifetime / phasor colour scale (Rainbow, Viridis, Plasma, …, or Custom)
 - **Load custom...** — CSV/TXT (R,G,B rows, low → high lifetime) or a horizontal colour-strip image
 
 On intensity, lifetime, and FRET images: **Masking tools** is top-left; pan / reset / zoom are top-right.
