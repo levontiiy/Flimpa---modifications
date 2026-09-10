@@ -271,6 +271,8 @@ After analysis, **Lifetime maps** Settings:
 
 ## Baseline check (decay curve)
 
+This option can be used to identify a suitable baseline correction to account for varying system configurations.
+
 1. Open **Lifetime maps**.
 2. In that tab’s Settings, turn on **Baseline check**.
 3. Click a pixel on the lifetime image.
@@ -282,7 +284,7 @@ In the window:
 - **Log scale (Y)**
 - **Show map τ curve** — purple 1-exp model using τ from the lifetime map
 - **Start plot at t₀** — if baseline correction is on, hide the empty pre-t₀ region
-- **Use IRF** — purple curve is IRF ⊗ exponential when a reference is loaded; off = plain exponential
+- **Use IRF** — purple curve is IRF ⊗ exponential when a reference is loaded; off = plain exponential (not accurate, may show unrealistic graphs)
 - **Move map τ** — slide the purple curve for display only (±5 ns)
 
 *Video: decay curve — Baseline check on a lifetime-map pixel*
@@ -293,7 +295,7 @@ In the window:
 
 After analysis, the **FRET** tab is the rightmost image tab. It shows `E = 1 − τ / τ_D`. Settings:
 
-- **Donor τ_D (ns)** — same value as **Reference lifetime**
+- **Donor τ_D (ns)** — the lifetime of unquenched donor. 
 - **Lifetime map** — which τ map is used
 - **Min. / Max. display range** — colour scale for *E* (default 0–1)
 
@@ -321,6 +323,8 @@ Masks are saved from the **Mask save** menu, not **Save data**.
 ---
 
 # Masking
+
+**Important:** After creating and saving masks through FLIMPA, reload the data together with the corresponding mask to apply them during analysis.
 
 Three ways to restrict which pixels enter phasor / lifetime analysis:
 
