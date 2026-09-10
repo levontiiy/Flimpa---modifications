@@ -49,9 +49,9 @@ This version was written post-publication by Lev Gerasimov as part of a summer p
 
 ---
 
-# Installation — FLIMPA 2.0.0
+# Installation/Download — FLIMPA 2.0.0
 
-## Install from release
+## Download and Run from release
 
 Download builds from [Releases v2.0.0](https://github.com/levontiiy/Flimpa---modifications/releases/tag/v2.0.0):
 
