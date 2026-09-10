@@ -234,8 +234,8 @@ Set these parameters (left panel), then click **Run Phasor Plot Analysis**:
 | **Reference lifetime (ns)** | Known lifetime of that reference (also donor `τ_D` for FRET; default 4 ns for Rhodamine 6G) |
 | **Pixel block size** | Spatial averaging of neighbouring pixels before phasor calculation (`3×3` default, or `7×7` / `9×9` / `12×12` / `None`). Not the decay time axis |
 | **Min. photon counts** / **Max. photon counts** | Pixels outside this intensity range are excluded (teal overlay on **Intensity display**) |
-| **Baseline correction** | `True` subtracts a constant offset estimated from the earliest delay channels |
-| **% time channels (baseline corr.)** | Fraction of those earliest channels used for the offset (default 3.5%) |
+| **Baseline correction** | `True` subtracts a constant offset estimated from the earliest delay channels (read baseline correction) |
+| **% time channels (baseline corr.)** | to account for detector delays (default 3.5%) |
 
 **Warning:** if real fluorescence is already present in the earliest time channels (for example after heavy `.ptu` time binning), baseline correction will subtract signal as well as noise. See slide 11 of the [PowerPoint user manual](https://github.com/levontiiy/Flimpa---modifications/blob/main/docs/FLIMPA_2.0.0_User_Manual_Presentation.pptx).
 
